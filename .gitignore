@@ -1,0 +1,18 @@
+# Ignore python local caching files
+__pycache__
+**.idea
+# Ignore notebook checkpoints
+**.ipynb_checkpoints
+**.ipynb
+# Vim files and python caches
+*~
+*.swp
+*.pyc
+# Ignore result directories
+# experiments/
+results/
+
+instructions_vessels_training_testing
+manuscript_tmi
+manuscript_arxiv
+pre_generated_results

@@ -1,0 +1,14 @@
+name: vessel_seg
+channels:
+  - defaults
+dependencies:
+  - python=3.6
+  - tqdm
+  - pandas
+  - scikit-learn
+  - scikit-image
+  - cudatoolkit=10.2
+  - torchvision
+  - pytorch
+prefix: /home/agaldran/anaconda3/envs/vessel_seg
+

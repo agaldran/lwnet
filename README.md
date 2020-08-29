@@ -13,6 +13,10 @@ arxiv.org/not_yet Sep. 2020
 
 We would appreciate if you could cite our work if it is useful for you :)
 
+
+> **Note**: If you are just looking for our results, you can directly download them [at this link](https://gitlab.com/agaldran/shared_results/-/raw/master/pre_generated_results.zip?inline=false).
+
+
 Please find below a table of contents describing what you can find in this repository:
 
 ## Table of Contents
@@ -26,8 +30,6 @@ Please find below a table of contents describing what you can find in this repos
 8. [Training a W-Net for Artery/Vein segmentation](https://github.com/agaldran/little_wnet#8-training-a-w-net-for-arteryvein-segmentation)
 9. [Generating Artery/Vein segmentations](https://github.com/agaldran/little_wnet#9-generating-arteryvein-segmentations)
 10. [Generating vessel and A/V segmentations on your own data](https://github.com/agaldran/little_wnet#10-generating-vessel-and-av-segmentations-on-your-own-data)
-
-> **Note**: If you are just looking for our results, you can directly download them [at this link](https://gitlab.com/agaldran/shared_results/-/raw/master/pre_generated_results.zip?inline=false).
 
 ## 1. Dependencies and getting the data ready
 First things first, clone this repo somewhere in your computer:

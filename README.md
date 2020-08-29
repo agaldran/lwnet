@@ -34,7 +34,7 @@ git clone https://github.com/agaldran/little_wnet.git .
 ```
 
 For full reproducibility, you should use the configuration specified in the `requirements.txt` file.
-If you are using conda, there is a requirements file that will install everything in one line, just run on a terminal:
+If you are using conda, you can install dependencies in one line, just run on a terminal:
 ```
 conda create --name lwnet --file environment.txt
 conda activate lwnet
@@ -220,4 +220,27 @@ python generate_av_results.py --config_file experiments/big_wnet_hrf_av_1024/con
 ```
 
 ## 10. Generating vessel and A/V segmentations on your own data
-Under development.
+To make it easy to construct segmentations on new data, we have also made available a script you can call on your own images:
+```
+python predict_one_image.py --model_path experiments/wnet_drive/
+                            --im_path my_image.jpg
+                            --result_path my_seg.png
+                            --mask_path my_mask.jpg
+                            --device cuda:0
+                            --bin_thresh 0.42
+```
+The script uses a model trained on DRIVE by default, you can change it to
+use a model trained on HRF (larger resolution but slower, see below).
+You can optionally pass the path to a FOV mask (if you do not the code builds one for you),
+the device used for the forward pass of the network (defaults to CPU), and the binarizing threshold
+(by default set to the optimal one in the DRIVE training set, 0.42).
+If for instance you want to use a model trained on HRF, you will want to change the image size and the threshold as follows:
+```
+python predict_one_image.py --model_path experiments/wnet_hrf_1024/
+                            --im_path my_image.jpg
+                            --result_path my_seg.png
+                            --device cuda:0
+                            --im_size 1024
+                            --bin_thresh 0.3725
+```
+

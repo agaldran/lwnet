@@ -27,6 +27,8 @@ Please find below a table of contents describing what you can find in this repos
 9. [Generating Artery/Vein segmentations](https://github.com/agaldran/little_wnet#9-generating-arteryvein-segmentations)
 10. [Generating vessel and A/V segmentations on your own data](https://github.com/agaldran/little_wnet#10-generating-vessel-and-av-segmentations-on-your-own-data)
 
+> **Note**: If you are just looking for our results, you can directly download them [at this link](https://gitlab.com/agaldran/shared_results/-/raw/master/pre_generated_results.zip?inline=false).
+
 ## 1. Dependencies and getting the data ready
 First things first, clone this repo somewhere in your computer:
 ```
@@ -220,27 +222,35 @@ python generate_av_results.py --config_file experiments/big_wnet_hrf_av_1024/con
 ```
 
 ## 10. Generating vessel and A/V segmentations on your own data
-To make it easy to construct segmentations on new data, we have also made available a script you can call on your own images:
+To make it easy to construct segmentations on new data, we have also made available pretrained weights in the `experiments/` folder, and a script you can call on your own images:
 ```
 python predict_one_image.py --model_path experiments/wnet_drive/
-                            --im_path my_image.jpg
-                            --result_path my_seg.png
-                            --mask_path my_mask.jpg
+                            --im_path folder/my_image.jpg
+                            --result_path my_results/
+                            --mask_path folder/my_mask.jpg
                             --device cuda:0
                             --bin_thresh 0.42
 ```
 The script uses a model trained on DRIVE by default, you can change it to
-use a model trained on HRF (larger resolution but slower, see below).
-You can optionally pass the path to a FOV mask (if you do not the code builds one for you),
+use a model that you would have trained on HRF (larger resolution but slower, see below).
+You can optionally pass the path to a FOV mask (if you do not, the code builds one for you),
 the device used for the forward pass of the network (defaults to CPU), and the binarizing threshold
 (by default set to the optimal one in the DRIVE training set, 0.42).
 If for instance you want to use a model trained on HRF, you will want to change the image size and the threshold as follows:
 ```
 python predict_one_image.py --model_path experiments/wnet_hrf_1024/
-                            --im_path my_image.jpg
-                            --result_path my_seg.png
+                            --im_path folder/my_image.jpg
+                            --result_path my_results/
                             --device cuda:0
                             --im_size 1024
                             --bin_thresh 0.3725
 ```
-
+If you are interested in generating A/V segmentations, you can use a second script called ``predict_one_image_av.py`.
+The usage is very similar (on the CPU in this case, automatic mask computing):
+```
+python predict_one_image.py --model_path experiments/big_wnet_drive/
+                            --im_path folder/my_image.jpg
+                            --result_path my_results/
+                            --device cuda:0
+```
+Note that there is no need to supply a threshold in this case, since we take the argmax of the probabilities to generate hard segmentations.

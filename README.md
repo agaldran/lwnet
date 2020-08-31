@@ -201,12 +201,13 @@ Again, HRF is trained at image size `1024x1024`:
 ```
 python train_cyclical.py --csv_train data/DRIVE/train_av.csv --model_name big_wnet
                          --cycle_len 40/50 --do_not_save False --save_path big_wnet_drive_av
+                         --device cuda:0
 ```
 
 ```
 python train_cyclical.py --csv_train data/HRF/train_av.csv --model_name big_wnet
                          --cycle_len 40/50 --do_not_save False --save_path big_wnet_hrf_av_1024
-                         --im_size 1024 --batch_size 2 --grad_acc_steps 1
+                         --im_size 1024 --batch_size 2 --grad_acc_steps 1  --device cuda:0
 ```
 
 ## 9. Generating Artery/Vein segmentations
@@ -253,6 +254,5 @@ The usage is very similar (on the CPU in this case, automatic mask computing):
 python predict_one_image_av.py --model_path experiments/big_wnet_drive/
                               --im_path folder/my_image.jpg
                               --result_path my_results/
-                              --device cuda:0
 ```
 Note that there is no need to supply a threshold in this case, since we take the argmax of the probabilities to generate hard segmentations.

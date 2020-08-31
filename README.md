@@ -20,16 +20,16 @@ We would appreciate if you could cite our work if it is useful for you :)
 Please find below a table of contents describing what you can find in this repository:
 
 ## Table of Contents
-1. [Dependencies and getting the data ready](https://github.com/agaldran/little_wnet#1-dependencies-and-getting-the-data-ready)
-2. [Training a W-Net for vessel segmentation](https://github.com/agaldran/little_wnet#2-training-a-w-net-for-vessel-segmentation)
-3. [Generating segmentations](https://github.com/agaldran/little_wnet#3-generating-segmentations)
-4. [Computing Performance](https://github.com/agaldran/little_wnet#4-computing-performance)
-5. [Cross-Dataset Experiments](https://github.com/agaldran/little_wnet#5-cross-dataset-experiments)
-6. [Training with pseudo-labels and computing performance](https://github.com/agaldran/little_wnet#6-training-with-pseudo-labels-and-computing-performance)
-7. [Evaluating your own model](https://github.com/agaldran/little_wnet#7-evaluating-your-own-model)
-8. [Training a W-Net for Artery/Vein segmentation](https://github.com/agaldran/little_wnet#8-training-a-w-net-for-arteryvein-segmentation)
-9. [Generating Artery/Vein segmentations](https://github.com/agaldran/little_wnet#9-generating-arteryvein-segmentations)
-10. [Generating vessel and A/V segmentations on your own data](https://github.com/agaldran/little_wnet#10-generating-vessel-and-av-segmentations-on-your-own-data)
+1. [Dependencies and getting the data ready](https://github.com/agaldran/lwnet#1-dependencies-and-getting-the-data-ready)
+2. [Training a W-Net for vessel segmentation](https://github.com/agaldran/lwnet#2-training-a-w-net-for-vessel-segmentation)
+3. [Generating segmentations](https://github.com/agaldran/lwnet#3-generating-segmentations)
+4. [Computing Performance](https://github.com/agaldran/lwnet#4-computing-performance)
+5. [Cross-Dataset Experiments](https://github.com/agaldran/lwnet#5-cross-dataset-experiments)
+6. [Training with pseudo-labels and computing performance](https://github.com/agaldran/lwnet#6-training-with-pseudo-labels-and-computing-performance)
+7. [Evaluating your own model](https://github.com/agaldran/lwnet#7-evaluating-your-own-model)
+8. [Training a W-Net for Artery/Vein segmentation](https://github.com/agaldran/lwnet#8-training-a-w-net-for-arteryvein-segmentation)
+9. [Generating Artery/Vein segmentations](https://github.com/agaldran/lwnet#9-generating-arteryvein-segmentations)
+10. [Generating vessel and A/V segmentations on your own data](https://github.com/agaldran/lwnet#10-generating-vessel-and-av-segmentations-on-your-own-data)
 
 ## 1. Dependencies and getting the data ready
 First things first, clone this repo somewhere in your computer:

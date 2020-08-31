@@ -247,12 +247,12 @@ python predict_one_image.py --model_path experiments/wnet_hrf_1024/
                             --im_size 1024
                             --bin_thresh 0.3725
 ```
-If you are interested in generating A/V segmentations, you can use a second script called ``predict_one_image_av.py`.
+If you are interested in generating A/V segmentations, you can use a second script called `predict_one_image_av.py`.
 The usage is very similar (on the CPU in this case, automatic mask computing):
 ```
-python predict_one_image.py --model_path experiments/big_wnet_drive/
-                            --im_path folder/my_image.jpg
-                            --result_path my_results/
-                            --device cuda:0
+python predict_one_image_av.py --model_path experiments/big_wnet_drive/
+                              --im_path folder/my_image.jpg
+                              --result_path my_results/
+                              --device cuda:0
 ```
 Note that there is no need to supply a threshold in this case, since we take the argmax of the probabilities to generate hard segmentations.

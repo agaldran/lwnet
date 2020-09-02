@@ -256,3 +256,12 @@ python predict_one_image_av.py --model_path experiments/big_wnet_drive/
                               --result_path my_results/
 ```
 Note that there is no need to supply a threshold in this case, since we take the argmax of the probabilities to generate hard segmentations.
+
+If instead you want to use a model trained on HRF (also provided) at a larger resolution of 1024x1024, you would run:
+```
+python predict_one_image_av.py --model_path experiments/big_wnet_hrf_av_1024/ 
+                               --im_path folder/my_image.jpg 
+                               --result_path my_results/
+                               --im_size 1024
+```
+Using this model should result in finer arteries and veins delineations (although not necessarily more accurate), which may be desirable if your data is of higher resolution than DRIVE.

@@ -264,4 +264,4 @@ python predict_one_image_av.py --model_path experiments/big_wnet_hrf_av_1024/
                                --result_path my_results/
                                --im_size 1024
 ```
-Using this model should result in finer arteries and veins delineations (although not necessarily more accurate), which may be desirable if your data is of higher resolution than DRIVE.
+Using this model should result in finer arteries and veins delineations (although not necessarily more accuracy), which may be desirable if your data is of higher resolution than DRIVE.

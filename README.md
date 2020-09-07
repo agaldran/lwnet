@@ -8,7 +8,7 @@ For more details about our work, you can check the related paper:
 ```
 The Little W-Net That Could: State-of-the-Art Retinal Vessel Segmentation with Minimalistic Models
 Adrian Galdran, André Anjos, Jose Dolz, Hadi Chakor, Hervé Lombaert, Ismail Ben Ayed
-[https://arxiv.org/abs/2009.01907](https://arxiv.org/abs/2009.01907) Sep. 2020
+https://arxiv.org/abs/2009.01907, Sep. 2020
 ```
 
 We would appreciate if you could cite our work if it is useful for you :)

@@ -78,7 +78,8 @@ def get_fov(img):
         img = Resize(500)(img)
 
     with np.errstate(divide='ignore'):
-        im_v = equalize_adapthist(rgb2hsv(np.array(img))[:, :, 2])
+        im_v = equalize_adapthist(np.array(img))[:, :, 1]
+        # im_v = equalize_adapthist(rgb2hsv(np.array(img))[:, :, 2])
     thresh = threshold_minimum(im_v)
     binary = binary_fill_holes(im_v > thresh)
 

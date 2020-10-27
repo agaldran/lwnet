@@ -167,7 +167,7 @@ class TvLoss(torch.nn.Module):
         tv = self.compute_tv(logits.squeeze())
         masked_tv = torch.mul(tv, labels)
 
-        masked_tv = torch.clamp(torch.div(masked_tv, torch.nn.Sigmoid()(logits) + 1e-4), 0, 1)
+        masked_tv = torch.clamp(torch.div(masked_tv, torch.nn.Sigmoid()(logits.squeeze()) + 1e-4), 0, 1)
 
         perfect_logits = labels.float()
         tv = self.compute_tv(perfect_logits)

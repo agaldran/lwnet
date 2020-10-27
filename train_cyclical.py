@@ -92,8 +92,8 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
                 if model.n_classes == 1: # BCEWithLogitsLoss()/DiceLoss()
                     loss_aux = criterion(logits_aux, labels.unsqueeze(dim=1).float())
                     tv_loss_back = tv_criterion(-logits, 1 - labels)
-                    tv_loss_fg = tv_criterion(logits, labels)
-                    loss = loss_aux + criterion(logits, labels.unsqueeze(dim=1).float())+tv_loss_back+tv_loss_fg
+                    # tv_loss_fg = tv_criterion(logits, labels)
+                    loss = loss_aux + criterion(logits, labels.unsqueeze(dim=1).float())+10*tv_loss_back#+tv_loss_fg
                 else: # CrossEntropyLoss()
                     loss_aux = criterion(logits_aux, labels)
                     loss = loss_aux + criterion(logits, labels)

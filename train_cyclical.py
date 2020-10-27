@@ -14,7 +14,7 @@ from utils.model_saving_loading import save_model, str2bool, load_model
 from utils.reproducibility import set_seeds
 
 from torch.optim.lr_scheduler import CosineAnnealingLR
-
+from utils.dice_loss import DiceLoss, TvLoss
 # argument parsing
 parser = argparse.ArgumentParser()
 # as seen here: https://stackoverflow.com/a/15460288/3208255
@@ -75,7 +75,7 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
         grad_acc_steps=0, assess=False):
     device='cuda' if next(model.parameters()).is_cuda else 'cpu'
     train = optimizer is not None  # if we are in training mode there will be an optimizer and train=True here
-
+    tv_criterion = TvLoss()
     if train:
         model.train()
     else:
@@ -91,7 +91,8 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
                 logits_aux, logits = logits
                 if model.n_classes == 1: # BCEWithLogitsLoss()/DiceLoss()
                     loss_aux = criterion(logits_aux, labels.unsqueeze(dim=1).float())
-                    loss = loss_aux + criterion(logits, labels.unsqueeze(dim=1).float())
+                    tv_loss_back = tv_criterion(-logits, 1 - labels)
+                    loss = loss_aux + criterion(logits, labels.unsqueeze(dim=1).float())+tv_loss_back
                 else: # CrossEntropyLoss()
                     loss_aux = criterion(logits_aux, labels)
                     loss = loss_aux + criterion(logits, labels)

@@ -164,7 +164,7 @@ class TvLoss(torch.nn.Module):
         # assumes logits is bs x n_classes H x W,
         #         labels is bs x H x W containing integer values in [0,...,n_classes-1]
 
-        tv = self.compute_tv(logits)
+        tv = self.compute_tv(logits.squeeze())
         masked_tv = torch.mul(tv, labels)
 
         # masked_tv = torch.clamp(torch.div(masked_tv, torch.nn.Sigmoid()(logits) + 1e-4), 0, 1)

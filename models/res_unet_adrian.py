@@ -111,7 +111,7 @@ class UNet(nn.Module):
 
         # init, shamelessly lifted from torchvision/models/resnet.py
         for m in self.modules():
-            if isinstance(m, nn.Conv2d, nn.ConvTranspose2d):
+            if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d)):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)

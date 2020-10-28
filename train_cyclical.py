@@ -14,7 +14,7 @@ from utils.model_saving_loading import save_model, str2bool, load_model
 from utils.reproducibility import set_seeds
 
 from torch.optim.lr_scheduler import CosineAnnealingLR
-from utils.dice_loss import DiceLoss, TvLoss
+from utils.dice_loss import DiceLoss, TvLoss, SimilarityLoss
 # argument parsing
 parser = argparse.ArgumentParser()
 # as seen here: https://stackoverflow.com/a/15460288/3208255
@@ -76,6 +76,7 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
     device='cuda' if next(model.parameters()).is_cuda else 'cpu'
     train = optimizer is not None  # if we are in training mode there will be an optimizer and train=True here
     tv_criterion = TvLoss()
+    sim_criterion = SimilarityLoss()
     if train:
         model.train()
     else:
@@ -91,11 +92,13 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
                 logits_aux, logits = logits
                 if model.n_classes == 1: # BCEWithLogitsLoss()/DiceLoss()
                     loss_aux = criterion(logits_aux, labels.unsqueeze(dim=1).float())
-                    tv_loss_back = tv_criterion(-logits, 1 - labels)
+                    # tv_loss_back = tv_criterion(-logits, 1 - labels)
                     # tv_loss_fg = tv_criterion(logits, labels)
-                    loss = loss_aux + criterion(logits, labels.unsqueeze(dim=1).float())+tv_loss_back#+tv_loss_fg
-                else: # CrossEntropyLoss()
+                    loss = loss_aux + criterion(logits, labels.unsqueeze(dim=1).float())#+tv_loss_back#+tv_loss_fg
+
+                else: # CrossEntropyLoss() -> A/V segmentation
                     loss_aux = criterion(logits_aux, labels)
+                    #sim_loss_aux = sim_criterion(logits_aux, labels)
                     loss = loss_aux + criterion(logits, labels)
             else: # not wnet
                 if model.n_classes == 1:
@@ -269,7 +272,7 @@ if __name__ == '__main__':
 
 
     print('* Instantiating a {} model'.format(model_name))
-    model = get_arch(model_name, n_classes=n_classes)
+    model = get_arch(model_name, n_classes=n_classes, in_norm=False, norm='in')
     model = model.to(device)
 
     print("Total params: {0:,}".format(sum(p.numel() for p in model.parameters() if p.requires_grad)))

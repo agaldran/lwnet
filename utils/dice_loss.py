@@ -182,3 +182,58 @@ class TvLoss(torch.nn.Module):
             return masked_tv
         else:
             sys.exit('not a valid reduction scheme')
+
+
+class SimilarityLoss(torch.nn.Module):
+    def __init__(self, with_probs=True, reduction='mean'):
+        super(SimilarityLoss, self).__init__()
+        self.with_probs = with_probs
+        self.reduction = reduction
+
+    def forward(self, logits, labels, **kwargs):
+        # assumes logits is bs x n_classes H x W,
+        #         labels is bs x H x W containing integer values in [0,...,n_classes-1]
+        if self.with_probs:
+            probs = torch.nn.Softmax(dim=1)(logits).detach()
+        else:
+            probs = logits
+
+        similarity_veins, similarity_arteries = [], []
+
+        translated = torch.roll(probs, shifts=1, dims=3)
+        sim_along_veins = torch.nn.CosineSimilarity(dim=0)(probs[:, 2][labels == 2], translated[:, 2][labels == 2])
+        sim_along_arteries = torch.nn.CosineSimilarity(dim=0)(probs[:, 3][labels == 3], translated[:, 3][labels == 3])
+
+        similarity_veins.append(sim_along_veins)
+        similarity_arteries.append(sim_along_arteries)
+
+        translated = torch.roll(probs, shifts=-1, dims=3)
+        sim_along_veins = torch.nn.CosineSimilarity(dim=0)(probs[:, 2][labels == 2], translated[:, 2][labels == 2])
+        sim_along_arteries = torch.nn.CosineSimilarity(dim=0)(probs[:, 3][labels == 3], translated[:, 3][labels == 3])
+
+        similarity_veins.append(sim_along_veins)
+        similarity_arteries.append(sim_along_arteries)
+
+        translated = torch.roll(probs, shifts=1, dims=2)
+        sim_along_veins = torch.nn.CosineSimilarity(dim=0)(probs[:, 2][labels == 2], translated[:, 2][labels == 2])
+        sim_along_arteries = torch.nn.CosineSimilarity(dim=0)(probs[:, 3][labels == 3], translated[:, 3][labels == 3])
+
+        similarity_veins.append(sim_along_veins)
+        similarity_arteries.append(sim_along_arteries)
+
+        translated = torch.roll(probs, shifts=-1, dims=2)
+        sim_along_veins = torch.nn.CosineSimilarity(dim=0)(probs[:, 2][labels == 2], translated[:, 2][labels == 2])
+        sim_along_arteries = torch.nn.CosineSimilarity(dim=0)(probs[:, 3][labels == 3], translated[:, 3][labels == 3])
+
+        similarity_veins.append(sim_along_veins)
+        similarity_arteries.append(sim_along_arteries)
+
+        sim_veins = torch.mean(torch.stack(similarity_veins, dim=0), dim=0)
+        sim_arts = torch.mean(torch.stack(similarity_arteries, dim=0), dim=0)
+
+        if self.reduction == 'mean':  # 1 value for the entire batch
+            return torch.mean(torch.stack([sim_veins, sim_arts], dim=0), dim=0)
+        elif self.reduction == 'none':  # n_classes values per element in batch
+            return [sim_veins, sim_arts]
+        else:
+            sys.exit('not a valid reduction scheme')

@@ -22,11 +22,13 @@ class ConvBlock(torch.nn.Module):
         else: self.pool = False
 
         block.append(nn.Conv2d(in_c, out_c, kernel_size=k_sz, padding=pad))
-        block.append(nn.ReLU())
+        # block.append(nn.ReLU())
+        block.append(nn.LeakyReLU())
         block.append(nn.BatchNorm2d(out_c))
 
         block.append(nn.Conv2d(out_c, out_c, kernel_size=k_sz, padding=pad))
-        block.append(nn.ReLU())
+        # block.append(nn.ReLU())
+        block.append(nn.LeakyReLU())
         block.append(nn.BatchNorm2d(out_c))
 
         self.block = nn.Sequential(*block)
@@ -61,7 +63,8 @@ class ConvBridgeBlock(torch.nn.Module):
         block=[]
 
         block.append(nn.Conv2d(channels, channels, kernel_size=k_sz, padding=pad))
-        block.append(nn.ReLU())
+        # block.append(nn.ReLU())
+        block.append(nn.LeakyReLU())
         block.append(nn.BatchNorm2d(channels))
 
         self.block = nn.Sequential(*block)
@@ -112,7 +115,7 @@ class UNet(nn.Module):
         # init, shamelessly lifted from torchvision/models/resnet.py
         for m in self.modules():
             if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d)):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='leaky_relu')
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)

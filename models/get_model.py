@@ -25,7 +25,7 @@ def get_arch(model_name, in_c=3, n_classes=1):
     if model_name == 'unet':
         model = unet(in_c=in_c, n_classes=n_classes, layers=[8,16,32], conv_bridge=True, shortcut=True)
     elif model_name == 'big_unet':
-        model = unet(in_c=in_c, n_classes=n_classes, layers=[12,24,48], conv_bridge=True, shortcut=True)
+        model = unet(in_c=in_c, n_classes=n_classes, layers=[8,16,32,64], conv_bridge=True, shortcut=True)
     elif model_name == 'wnet':
         model = wnet(in_c=in_c, n_classes=n_classes, layers=[8,16,32], conv_bridge=True, shortcut=True)
     elif model_name == 'big_wnet':

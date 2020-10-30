@@ -7,8 +7,12 @@ import torch
 class wnet(torch.nn.Module):
     def __init__(self, n_classes=1, in_c=3, layers=(8, 16, 32), conv_bridge=True, shortcut=True, mode='train', compose='mul'):
         super(wnet, self).__init__()
-        self.unet1 = unet(in_c=in_c, n_classes=n_classes, layers=layers, conv_bridge=conv_bridge, shortcut=shortcut)
-        self.unet2 = unet(in_c=in_c+n_classes, n_classes=n_classes, layers=layers, conv_bridge=conv_bridge, shortcut=shortcut)
+        if compose=='mul':
+            self.unet1 = unet(in_c=in_c, n_classes=1, layers=layers, conv_bridge=conv_bridge, shortcut=shortcut)
+            self.unet2 = unet(in_c=in_c, n_classes=n_classes, layers=layers, conv_bridge=conv_bridge, shortcut=shortcut)
+        elif self.compose == 'cat':
+            self.unet1 = unet(in_c=in_c, n_classes=n_classes, layers=layers, conv_bridge=conv_bridge, shortcut=shortcut)
+            self.unet2 = unet(in_c=in_c+n_classes, n_classes=n_classes, layers=layers, conv_bridge=conv_bridge, shortcut=shortcut)
         self.n_classes = n_classes
         self.mode=mode
         self.compose=compose

@@ -274,7 +274,7 @@ if __name__ == '__main__':
 
 
     print('* Instantiating a {} model'.format(model_name))
-    model = get_arch(model_name, n_classes=n_classes, compose='cat')
+    model = get_arch(model_name, n_classes=n_classes, compose='mul')
     model = model.to(device)
 
     print("Total params: {0:,}".format(sum(p.numel() for p in model.parameters() if p.requires_grad)))

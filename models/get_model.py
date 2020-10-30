@@ -5,31 +5,35 @@ import torch
 
 # from .res_unet_adrian import WNet as wnet
 class wnet(torch.nn.Module):
-    def __init__(self, n_classes=1, in_c=3, layers=(8, 16, 32), conv_bridge=True, shortcut=True, mode='train'):
+    def __init__(self, n_classes=1, in_c=3, layers=(8, 16, 32), conv_bridge=True, shortcut=True, mode='train', compose='mul'):
         super(wnet, self).__init__()
         self.unet1 = unet(in_c=in_c, n_classes=n_classes, layers=layers, conv_bridge=conv_bridge, shortcut=shortcut)
         self.unet2 = unet(in_c=in_c+n_classes, n_classes=n_classes, layers=layers, conv_bridge=conv_bridge, shortcut=shortcut)
         self.n_classes = n_classes
         self.mode=mode
+        self.compose=compose
 
     def forward(self, x):
         x1 = self.unet1(x)
-        x2 = self.unet2(torch.cat([x, x1], dim=1))
+        if self.compose=='mul':
+            x2 = self.unet2(torch.mul(x, torch.stack(3 * [x1.squeeze(dim=1)], axis=1)))
+        elif self.compose=='cat':
+            x2 = self.unet2(torch.cat([x, x1], dim=1))
         if self.mode!='train':
             return x2
         return x1,x2
 
 
-def get_arch(model_name, in_c=3, n_classes=1):
+def get_arch(model_name, in_c=3, n_classes=1, compose='cat'):
 
     if model_name == 'unet':
         model = unet(in_c=in_c, n_classes=n_classes, layers=[8,16,32], conv_bridge=True, shortcut=True)
     elif model_name == 'big_unet':
         model = unet(in_c=in_c, n_classes=n_classes, layers=[8,16,32,64], conv_bridge=True, shortcut=True)
     elif model_name == 'wnet':
-        model = wnet(in_c=in_c, n_classes=n_classes, layers=[8,16,32], conv_bridge=True, shortcut=True)
+        model = wnet(in_c=in_c, n_classes=n_classes, layers=[8,16,32], conv_bridge=True, shortcut=True, compose=compose)
     elif model_name == 'big_wnet':
-        model = wnet(in_c=in_c, n_classes=n_classes, layers=[8,16,32,64], conv_bridge=True, shortcut=True)
+        model = wnet(in_c=in_c, n_classes=n_classes, layers=[8,16,32,64], conv_bridge=True, shortcut=True, compose=compose)
 
 
     else: sys.exit('not a valid model_name, check models.get_model.py')

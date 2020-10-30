@@ -125,7 +125,7 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
         run_loss = running_loss / n_elems
 
     if assess: return logits_all, labels_all, run_loss
-    return None, None, None
+    return None, None, run_loss
 
 def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=None, grad_acc_steps=0, cycle=0):
 

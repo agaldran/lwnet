@@ -39,7 +39,7 @@ parser.add_argument('--csv_test', type=str, default=None, help='path to test dat
 parser.add_argument('--path_test_preds', type=str, default=None, help='path to test predictions (for using pseudo labels)')
 parser.add_argument('--checkpoint_folder', type=str, default=None, help='path to model to start training (with pseudo labels now)')
 parser.add_argument('--num_workers', type=int, default=0, help='number of parallel (multiprocessing) workers to launch for data loading tasks (handled by pytorch) [default: %(default)s]')
-parser.add_argument('--device', type=str, default='cpu', help='where to run the training code (e.g. "cpu" or "cuda:0") [default: %(default)s]')
+parser.add_argument('--device', type=str, default='cuda:0', help='where to run the training code (e.g. "cpu" or "cuda:0") [default: %(default)s]')
 
 
 def compare_op(metric):
@@ -95,7 +95,7 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
                 loss_aux = torch.nn.BCEWithLogitsLoss()(logits_aux, labels_aux.float())
             elif model.compose=='cat':
                 loss_aux = criterion(logits_aux, labels)
-                
+
             loss = loss_aux + criterion(logits, labels)
         else: # not wnet
             if model.n_classes == 1:

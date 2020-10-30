@@ -164,12 +164,12 @@ def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler
         # train one cycle, retrieve segmentation data and compute metrics at the end of cycle
         tr_logits, tr_labels, tr_loss = train_one_cycle(train_loader, model, criterion, optimizer, scheduler, grad_acc_steps, cycle)
         # classification metrics at the end of cycle
-        tr_dice, tr_mcc = evaluate(tr_logits, tr_labels, model.n_classes)  # for n_classes>1, will need to redo evaluate
+        tr_dice, tr_mcc = evaluate(tr_logits, tr_labels)  # for n_classes>1, will need to redo evaluate
         del tr_logits, tr_labels
         with torch.no_grad():
             assess=True
             vl_logits, vl_labels, vl_loss = run_one_epoch(val_loader, model, criterion, assess=assess)
-            vl_dice, vl_mcc = evaluate(vl_logits, vl_labels, model.n_classes)  # for n_classes>1, will need to redo evaluate
+            vl_dice, vl_mcc = evaluate(vl_logits, vl_labels)  # for n_classes>1, will need to redo evaluate
             del vl_logits, vl_labels
         print('Train/Val Loss: {:.4f}/{:.4f} -- Train/Val DICE: {:.4f}/{:.4f} -- Train/Val MCC: {:.4f}/{:.4f} -- LR={:.6f}'.format(
                 tr_loss, vl_loss, tr_dice, vl_dice, tr_mcc, vl_mcc,  get_lr(optimizer)).rstrip('0'))

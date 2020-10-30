@@ -116,8 +116,8 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
                 for _ in range(grad_acc_steps+1): scheduler.step() # for grad_acc_steps=0, this means once
                 optimizer.zero_grad()
         if assess:
-            logits_all.extend(logits)
-            labels_all.extend(labels)
+            logits_all.extend(logits.detach().cpu())
+            labels_all.extend(labels.cpu())
 
         # Compute running loss
         running_loss += loss.item() * inputs.size(0)

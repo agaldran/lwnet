@@ -134,7 +134,7 @@ def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=No
     cycle_len = scheduler.cycle_lens[cycle]
     with trange(cycle_len) as t:
         for epoch in range(cycle_len):
-            print('Cycle {:d} | Epoch {:d}/{:d}'.format(cycle+1, epoch+1, cycle_len))
+            # print('Cycle {:d} | Epoch {:d}/{:d}'.format(cycle+1, epoch+1, cycle_len))
             if epoch == cycle_len-1: assess=True # only get logits/labels on last cycle
             else: assess = False
             tr_logits, tr_labels, tr_loss = run_one_epoch(train_loader, model, criterion, optimizer=optimizer,

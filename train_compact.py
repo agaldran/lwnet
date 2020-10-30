@@ -28,7 +28,7 @@ parser.add_argument('--grad_acc_steps', type=int, default=0, help='gradient accu
 parser.add_argument('--min_lr', type=float, default=1e-8, help='learning rate')
 parser.add_argument('--max_lr', type=float, default=0.01, help='learning rate')
 parser.add_argument('--cycle_lens', type=str, default='20/50', help='cycling config (nr cycles/cycle len')
-parser.add_argument('--metric', type=str, default='auc', help='which metric to use for monitoring progress (tr_auc/auc/loss/dice)')
+parser.add_argument('--metric', type=str, default='dice', help='which metric to use for monitoring progress (tr_auc/auc/loss/dice)')
 parser.add_argument('--im_size', help='delimited list input, could be 600,400', type=str, default='512')
 parser.add_argument('--do_not_save', type=str2bool, nargs='?', const=True, default=False, help='avoid saving anything')
 parser.add_argument('--save_path', type=str, default='date_time', help='path to save model (defaults to date/time')

@@ -92,7 +92,7 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
             # CrossEntropyLoss() -> A/V segmentation
             if model.compose=='mul':
                 labels_aux = labels != 0
-                loss_aux = torch.nn.BCEWithLogitsLoss()(logits_aux, labels_aux.float())
+                loss_aux = torch.nn.BCEWithLogitsLoss()(logits_aux.squeeze(), labels_aux.float())
             elif model.compose=='cat':
                 loss_aux = criterion(logits_aux, labels)
 

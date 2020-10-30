@@ -144,6 +144,7 @@ def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=No
                                                                                              epoch + 1, cycle_len,
                                                                                              float(tr_loss),
                                                                                              get_lr(optimizer)))
+            t.update()
     return tr_logits, tr_labels, tr_loss
 
 def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler, grad_acc_steps, metric, exp_path):

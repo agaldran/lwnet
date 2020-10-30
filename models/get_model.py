@@ -10,7 +10,7 @@ class wnet(torch.nn.Module):
         if compose=='mul':
             self.unet1 = unet(in_c=in_c, n_classes=1, layers=layers, conv_bridge=conv_bridge, shortcut=shortcut)
             self.unet2 = unet(in_c=in_c, n_classes=n_classes, layers=layers, conv_bridge=conv_bridge, shortcut=shortcut)
-        elif self.compose == 'cat':
+        elif compose == 'cat':
             self.unet1 = unet(in_c=in_c, n_classes=n_classes, layers=layers, conv_bridge=conv_bridge, shortcut=shortcut)
             self.unet2 = unet(in_c=in_c+n_classes, n_classes=n_classes, layers=layers, conv_bridge=conv_bridge, shortcut=shortcut)
         self.n_classes = n_classes

@@ -1,4 +1,4 @@
-import sys, json, os, argparse
+import sys, json, os, argparse, time
 from shutil import copyfile, rmtree
 import os.path as osp
 from datetime import datetime
@@ -150,7 +150,7 @@ def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=No
 def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler, grad_acc_steps, metric, exp_path):
 
     n_cycles = len(scheduler.cycle_lens)
-    best_auc, best_dice, best_cycle = 0, 0, 0
+    best_mcc, best_dice, best_cycle, all_dices = 0, 0, 0, []
     is_better, best_monitoring_metric = compare_op(metric)
 
     for cycle in range(n_cycles):
@@ -164,36 +164,37 @@ def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler
         # train one cycle, retrieve segmentation data and compute metrics at the end of cycle
         tr_logits, tr_labels, tr_loss = train_one_cycle(train_loader, model, criterion, optimizer, scheduler, grad_acc_steps, cycle)
         # classification metrics at the end of cycle
-        tr_auc, tr_dice = evaluate(tr_logits, tr_labels, model.n_classes)  # for n_classes>1, will need to redo evaluate
+        tr_dice, tr_mcc = evaluate(tr_logits, tr_labels, model.n_classes)  # for n_classes>1, will need to redo evaluate
         del tr_logits, tr_labels
         with torch.no_grad():
             assess=True
             vl_logits, vl_labels, vl_loss = run_one_epoch(val_loader, model, criterion, assess=assess)
-            vl_auc, vl_dice = evaluate(vl_logits, vl_labels, model.n_classes)  # for n_classes>1, will need to redo evaluate
+            vl_dice, vl_mcc = evaluate(vl_logits, vl_labels, model.n_classes)  # for n_classes>1, will need to redo evaluate
             del vl_logits, vl_labels
-        print('Train/Val Loss: {:.4f}/{:.4f}  -- Train/Val AUC: {:.4f}/{:.4f}  -- Train/Val DICE: {:.4f}/{:.4f} -- LR={:.6f}'.format(
-                tr_loss, vl_loss, tr_auc, vl_auc, tr_dice, vl_dice, get_lr(optimizer)).rstrip('0'))
+        print('Train/Val Loss: {:.4f}/{:.4f} -- Train/Val DICE: {:.4f}/{:.4f} -- Train/Val MCC: {:.4f}/{:.4f} -- LR={:.6f}'.format(
+                tr_loss, vl_loss, tr_dice, vl_dice, tr_mcc, vl_mcc,  get_lr(optimizer)).rstrip('0'))
+        all_dices.append(100 * vl_dice)
 
         # check if performance was better than anyone before and checkpoint if so
-        if metric == 'auc':
-            monitoring_metric = vl_auc
-        elif metric == 'tr_auc':
-            monitoring_metric = tr_auc
+        if metric == 'mcc':
+            monitoring_metric = vl_mcc
         elif metric == 'loss':
             monitoring_metric = vl_loss
         elif metric == 'dice':
             monitoring_metric = vl_dice
         if is_better(monitoring_metric, best_monitoring_metric):
             print('Best {} attained. {:.2f} --> {:.2f}'.format(metric, 100*best_monitoring_metric, 100*monitoring_metric))
-            best_auc, best_dice, best_cycle = vl_auc, vl_dice, cycle+1
+            best_dice, best_mcc, best_cycle = vl_dice, vl_mcc, cycle+1
             best_monitoring_metric = monitoring_metric
             if exp_path is not None:
                 print(15 * '-', ' Checkpointing ', 15 * '-')
                 save_model(exp_path, model, optimizer)
+        else:
+            print('Best {} so far --> {:.2f} (cycle {})'.format(metric, 100*best_monitoring_metric, best_cycle))
 
     del model
     torch.cuda.empty_cache()
-    return best_auc, best_dice, best_cycle
+    return best_dice, best_mcc, best_cycle, all_dices
 
 if __name__ == '__main__':
     '''
@@ -310,10 +311,14 @@ if __name__ == '__main__':
     print('* Starting to train\n','-' * 10)
 
 
-    m1, m2, m3=train_model(model, optimizer, criterion, train_loader, val_loader, scheduler, grad_acc_steps, metric, experiment_path)
+    start = time.time()
+    m1, m2, m3, dices=train_model(model, optimizer, criterion, train_loader, val_loader, scheduler, grad_acc_steps, metric, experiment_path)
+    end = time.time()
+    hours, rem = divmod(end - start, 3600)
+    minutes, seconds = divmod(rem, 60)
 
-    print("val_auc: %f" % m1)
-    print("val_dice: %f" % m2)
+    print("val_dice: %f" % m1)
+    print("val_mcc: %f" % m2)
     print("best_cycle: %d" % m3)
     if do_not_save is False:
         # file = open(osp.join(experiment_path, 'val_metrics.txt'), 'w')
@@ -323,4 +328,7 @@ if __name__ == '__main__':
         # file.close()
 
         with open(osp.join(experiment_path, 'val_metrics.txt'), 'w') as f:
-            print('Best AUC = {:.2f}\nBest DICE = {:.2f}\nBest cycle = {}'.format(100*m1, 100*m2, m3), file=f)
+            print('Best DICE = {:.2f}\nBest MCC = {:.2f}\nBest cycle = {}'.format(100*m1, 100*m2, m3), file=f)
+            for j in range(len(dices)):
+                print('\nEpoch = {} -> Dice = {:.2f}'.format(j, dices[j]), file=f)
+            print('\nTraining time: {:0>2}h {:0>2}min {:05.2f}secs'.format(int(hours), int(minutes), seconds), file=f)

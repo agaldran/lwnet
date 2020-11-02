@@ -42,7 +42,6 @@ def ewma(data, window=5):
     cumsums = mult.cumsum()
     out = offset + cumsums*scale_arr[::-1]
     return out
-from sklearn.metrics import f1_score
 
 from sklearn.metrics import f1_score
 from sklearn.metrics import matthews_corrcoef as mcc

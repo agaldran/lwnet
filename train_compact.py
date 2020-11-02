@@ -80,7 +80,7 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
         model.train()
     else:
         model.eval()
-    if assess: logits_all, labels_all = [], []
+    if assess: f1_scs, mcc_scs = [], []
 
     n_elems, running_loss = 0, 0
     for i_batch, (inputs, labels) in enumerate(loader):
@@ -118,15 +118,16 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
                 for _ in range(grad_acc_steps+1): scheduler.step() # for grad_acc_steps=0, this means once
                 optimizer.zero_grad()
         if assess:
-            logits_all.extend(logits.detach().cpu())
-            labels_all.extend(labels.cpu())
+            f1_s, mcc_s = evaluate(logits.detach().cpu(), labels.cpu())
+            f1_scs.append(f1_s)
+            mcc_scs.append(mcc_s)
 
         # Compute running loss
         running_loss += loss.item() * inputs.size(0)
         n_elems += inputs.size(0)
         run_loss = running_loss / n_elems
 
-    if assess: return logits_all, labels_all, run_loss
+    if assess: return np.array(f1_scs).mean(), np.array(mcc_scs).mean()
     return None, None, run_loss
 
 def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=None, grad_acc_steps=0, cycle=0):
@@ -139,7 +140,7 @@ def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=No
             # print('Cycle {:d} | Epoch {:d}/{:d}'.format(cycle+1, epoch+1, cycle_len))
             if epoch == cycle_len-1: assess=True # only get logits/labels on last cycle
             else: assess = False
-            tr_logits, tr_labels, tr_loss = run_one_epoch(train_loader, model, criterion, optimizer=optimizer,
+            f1_sc, mcc_sc, tr_loss = run_one_epoch(train_loader, model, criterion, optimizer=optimizer,
                                                           scheduler=scheduler, grad_acc_steps=grad_acc_steps, assess=assess)
             t.set_postfix_str("Cycle: {}/{} Ep. {}/{} -- tr. loss={:.4f} / lr={:.6f}".format(cycle + 1,
                                                                                              len(scheduler.cycle_lens),
@@ -147,7 +148,7 @@ def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=No
                                                                                              float(tr_loss),
                                                                                              get_lr(optimizer)))
             t.update()
-    return tr_logits, tr_labels, tr_loss
+    return f1_sc, mcc_sc, tr_loss
 
 def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler, grad_acc_steps, metric, exp_path):
 
@@ -163,16 +164,15 @@ def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler
         # update number of iterations
         scheduler.T_max = scheduler.cycle_lens[cycle] * len(train_loader)
 
-        # train one cycle, retrieve segmentation data and compute metrics at the end of cycle
-        tr_logits, tr_labels, tr_loss = train_one_cycle(train_loader, model, criterion, optimizer, scheduler, grad_acc_steps, cycle)
-        # classification metrics at the end of cycle
-        tr_dice, tr_mcc = evaluate(tr_logits, tr_labels)  # for n_classes>1, will need to redo evaluate
-        del tr_logits, tr_labels
+        # train one cycle
+        _, _, _= train_one_cycle(train_loader, model, criterion, optimizer, scheduler, grad_acc_steps, cycle)
+
+        # classification metrics at the end of cycle, both for train and val (it's relatively cheap)
         with torch.no_grad():
             assess=True
-            vl_logits, vl_labels, vl_loss = run_one_epoch(val_loader, model, criterion, assess=assess)
-            vl_dice, vl_mcc = evaluate(vl_logits, vl_labels)  # for n_classes>1, will need to redo evaluate
-            del vl_logits, vl_labels
+            tr_dice, tr_mcc, tr_loss = run_one_epoch(train_loader, model, criterion, assess=assess)
+            vl_dice, vl_mcc, vl_loss = run_one_epoch(val_loader, model, criterion, assess=assess)
+
         print('Train/Val Loss: {:.4f}/{:.4f} -- Train/Val DICE: {:.4f}/{:.4f} -- Train/Val MCC: {:.4f}/{:.4f} -- LR={:.6f}'.format(
                 tr_loss, vl_loss, tr_dice, vl_dice, tr_mcc, vl_mcc,  get_lr(optimizer)).rstrip('0'))
         all_dices.append(100 * vl_dice)

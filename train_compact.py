@@ -94,7 +94,6 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
                 labels_aux = labels != 0
                 loss_aux = torch.nn.BCEWithLogitsLoss()(logits_aux.squeeze(), labels_aux.float())
             elif model.compose=='cat':
-                logits_aux, logits = logits
                 loss_aux = criterion(torch.cat([-10 * torch.ones(labels.shape).to(device),
                                                 logits_aux], dim=1), labels.squeeze(dim=1))
                 # loss_aux = criterion(logits_aux, labels)
@@ -214,7 +213,7 @@ if __name__ == '__main__':
         os.environ['CUDA_VISIBLE_DEVICES'] = args.device.split(":",1)[1]
         if not torch.cuda.is_available():
             raise RuntimeError("cuda is not currently available!")
-        print(f"* Training on device '{args.device}'...")
+        print('* Training on device {}'.format(args.device))
         device = torch.device("cuda")
 
     else:  #cpu
@@ -267,7 +266,7 @@ if __name__ == '__main__':
         label_values = [0, 255]
 
 
-    print(f"* Creating Dataloaders, batch size = {bs}, workers = {args.num_workers}")
+    print('* Creating Dataloaders, batch size = {}, workers = {}'.format(bs,args.num_workers))
     train_loader, val_loader = get_train_val_loaders(csv_path_train=csv_train, csv_path_val=csv_val, batch_size=bs, tg_size=tg_size, label_values=label_values, num_workers=args.num_workers)
 
     # grad_acc_steps: if I want to train with a fake_bs=K but the actual bs I want is bs=N, then you use

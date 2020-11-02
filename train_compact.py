@@ -94,9 +94,9 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
                 labels_aux = labels != 0
                 loss_aux = torch.nn.BCEWithLogitsLoss()(logits_aux.squeeze(), labels_aux.float())
             elif model.compose=='cat':
-                print(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1).shape)
-                print(labels.squeeze(dim=1).shape)
-                loss_aux = criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
+                print(torch.cat([-10 * torch.ones(labels.unsqueeze(dim=1).shape).to(device), logits_aux], dim=1).shape)
+
+                loss_aux = criterion(torch.cat([-10 * torch.ones(labels.unsqueeze(dim=1).shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
                 # loss_aux = criterion(logits_aux, labels)
 
             loss = loss_aux + criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze())

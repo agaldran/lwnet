@@ -72,7 +72,7 @@ def evaluate(logits, labels):
     all_preds_np += 1  # we are predicting only three classes and ignoring background
 
     return f1_score(all_targets_np, all_preds_np, average='weighted', labels=[1, 2, 3]), \
-           mcc(all_targets_np[all_targets_np != 0], all_preds_np[all_preds_np != 0])
+           mcc(all_targets_np[all_targets_np != 0], all_preds_np[all_targets_np != 0])
 
 # def evaluate(logits, labels):
 #     all_targets = []

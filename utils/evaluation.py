@@ -53,7 +53,6 @@ def evaluate(logits, labels):
     all_probs_1 = []
     all_probs_2 = []
 
-
     for i in range(len(logits)):
         probs = torch.nn.Softmax(dim=0)(logits[i]).detach().cpu().numpy()
         all_probs_0.extend(probs[0].ravel())
@@ -68,7 +67,8 @@ def evaluate(logits, labels):
     all_preds_np = np.argmax(all_probs_np, axis=1)
 
     all_targets_np = np.hstack(all_targets)
-    all_preds_np += 1  # we are predicting only three classes and ignoring background
+    all_preds_np = 1 + all_preds_np  # we are predicting only three classes and ignoring background
+    all_preds_np[all_targets_np == 0] = 0
 
     return f1_score(all_targets_np, all_preds_np, average='weighted', labels=[1, 2, 3]), \
            mcc(all_targets_np[all_targets_np != 0], all_preds_np[all_targets_np != 0])

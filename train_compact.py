@@ -94,6 +94,8 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
                 labels_aux = labels != 0
                 loss_aux = torch.nn.BCEWithLogitsLoss()(logits_aux.squeeze(), labels_aux.float())
             elif model.compose=='cat':
+                print(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1).shape)
+                print(labels.squeeze(dim=1).shape)
                 loss_aux = criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
                 # loss_aux = criterion(logits_aux, labels)
 
@@ -306,7 +308,7 @@ if __name__ == '__main__':
     setattr(scheduler, 'cycle_lens', cycle_lens)
 
 
-    criterion = torch.nn.BCEWithLogitsLoss() if model.n_classes == 1 else torch.nn.CrossEntropyLoss()
+    criterion = torch.nn.BCEWithLogitsLoss() if model.n_classes == 1 else torch.nn.CrossEntropyLoss(ignore_index=0)
 
 
     print('* Instantiating loss function', str(criterion))

@@ -94,8 +94,7 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
                 labels_aux = labels != 0
                 loss_aux = torch.nn.BCEWithLogitsLoss()(logits_aux.squeeze(), labels_aux.float())
             elif model.compose=='cat':
-                loss_aux = criterion(torch.cat([-10 * torch.ones(labels.shape).to(device),
-                                                logits_aux], dim=1), labels.squeeze(dim=1))
+                loss_aux = criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
                 # loss_aux = criterion(logits_aux, labels)
 
             loss = loss_aux + criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze())
@@ -259,7 +258,7 @@ if __name__ == '__main__':
 
     # training for artery-vein segmentation
     if 'av' in csv_train:
-        n_classes=4
+        n_classes=3 # we do not predict background here
         label_values=[0, 85, 170, 255]
     else:
         n_classes=1

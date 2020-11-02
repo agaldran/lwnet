@@ -124,7 +124,7 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
         n_elems += inputs.size(0)
         run_loss = running_loss / n_elems
 
-    if assess: return np.array(f1_scs).mean(), np.array(mcc_scs).mean()
+    if assess: return np.array(f1_scs).mean(), np.array(mcc_scs).mean(), run_loss
     return None, None, run_loss
 
 def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=None, grad_acc_steps=0, cycle=0):

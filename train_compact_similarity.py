@@ -100,7 +100,7 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
 
             loss = loss_aux + criterion(torch.cat([-10 * torch.ones(labels.unsqueeze(dim=1).shape).to(device), logits], dim=1), labels.squeeze())
 
-            loss_s = 1000 * (1 - sim_loss(torch.cat([-10 * torch.ones(labels.unsqueeze(dim=1).shape).to(device), logits], dim=1), labels.squeeze()))
+            loss_s = 100 * (1 - sim_loss(torch.cat([-10 * torch.ones(labels.unsqueeze(dim=1).shape).to(device), logits], dim=1), labels.squeeze()))
             loss += loss_s
 
             # loss = loss_aux + criterion(logits, labels)

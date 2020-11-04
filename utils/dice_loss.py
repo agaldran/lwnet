@@ -201,37 +201,29 @@ class SimilarityLoss(torch.nn.Module):
         similarity_veins, similarity_arteries = [], []
 
         translated = torch.roll(probs, shifts=1, dims=3)
-        sim_along_veins = torch.nn.CosineSimilarity(dim=0)(probs[:, 1][labels.squeeze() == 2],
-                                                           translated[:, 1][labels.squeeze() == 2])
-        sim_along_arteries = torch.nn.CosineSimilarity(dim=0)(probs[:, 2][labels.squeeze() == 3],
-                                                              translated[:, 2][labels.squeeze() == 3])
+        sim_along_veins = torch.nn.CosineSimilarity(dim=0)(probs[:, 2][labels == 2], translated[:, 2][labels == 2])
+        sim_along_arteries = torch.nn.CosineSimilarity(dim=0)(probs[:, 3][labels == 3], translated[:, 3][labels == 3])
 
         similarity_veins.append(sim_along_veins)
         similarity_arteries.append(sim_along_arteries)
 
         translated = torch.roll(probs, shifts=-1, dims=3)
-        sim_along_veins = torch.nn.CosineSimilarity(dim=0)(probs[:, 1][labels.squeeze() == 2],
-                                                           translated[:, 1][labels.squeeze() == 2])
-        sim_along_arteries = torch.nn.CosineSimilarity(dim=0)(probs[:, 2][labels.squeeze() == 3],
-                                                              translated[:, 2][labels.squeeze() == 3])
+        sim_along_veins = torch.nn.CosineSimilarity(dim=0)(probs[:, 2][labels == 2], translated[:, 2][labels == 2])
+        sim_along_arteries = torch.nn.CosineSimilarity(dim=0)(probs[:, 3][labels == 3], translated[:, 3][labels == 3])
 
         similarity_veins.append(sim_along_veins)
         similarity_arteries.append(sim_along_arteries)
 
         translated = torch.roll(probs, shifts=1, dims=2)
-        sim_along_veins = torch.nn.CosineSimilarity(dim=0)(probs[:, 1][labels.squeeze() == 2],
-                                                           translated[:, 1][labels.squeeze() == 2])
-        sim_along_arteries = torch.nn.CosineSimilarity(dim=0)(probs[:, 2][labels.squeeze() == 3],
-                                                              translated[:, 2][labels.squeeze() == 3])
+        sim_along_veins = torch.nn.CosineSimilarity(dim=0)(probs[:, 2][labels == 2], translated[:, 2][labels == 2])
+        sim_along_arteries = torch.nn.CosineSimilarity(dim=0)(probs[:, 3][labels == 3], translated[:, 3][labels == 3])
 
         similarity_veins.append(sim_along_veins)
         similarity_arteries.append(sim_along_arteries)
 
         translated = torch.roll(probs, shifts=-1, dims=2)
-        sim_along_veins = torch.nn.CosineSimilarity(dim=0)(probs[:, 1][labels.squeeze() == 2],
-                                                           translated[:, 1][labels.squeeze() == 2])
-        sim_along_arteries = torch.nn.CosineSimilarity(dim=0)(probs[:, 2][labels.squeeze() == 3],
-                                                              translated[:, 2][labels.squeeze() == 3])
+        sim_along_veins = torch.nn.CosineSimilarity(dim=0)(probs[:, 2][labels == 2], translated[:, 2][labels == 2])
+        sim_along_arteries = torch.nn.CosineSimilarity(dim=0)(probs[:, 3][labels == 3], translated[:, 3][labels == 3])
 
         similarity_veins.append(sim_along_veins)
         similarity_arteries.append(sim_along_arteries)

@@ -3,11 +3,11 @@ python train_consistency_loss.py --alpha_tv 0.1    --model_name wnet --save_path
 python train_consistency_loss.py --alpha_tv 0.05   --model_name wnet --save_path wnet_5e-2
 python train_consistency_loss.py --alpha_tv 0.01   --model_name wnet --save_path wnet_1e-2
 python train_consistency_loss.py --alpha_tv 0.005  --model_name wnet --save_path wnet_5e-3
-python train_consistency_loss.py --alpha_tv 0.0001 --model_name wnet --save_path wnet_1e-4
+python train_consistency_loss.py --alpha_tv 0.001  --model_name wnet --save_path wnet_1e-3
 
 python train_consistency_loss.py --alpha_tv 0      --model_name big_wnet --save_path big_wnet_CE_alone
 python train_consistency_loss.py --alpha_tv 0.1    --model_name big_wnet --save_path big_wnet_1e-1
 python train_consistency_loss.py --alpha_tv 0.05   --model_name big_wnet --save_path big_wnet_5e-2
 python train_consistency_loss.py --alpha_tv 0.01   --model_name big_wnet --save_path big_wnet_1e-2
 python train_consistency_loss.py --alpha_tv 0.005  --model_name big_wnet --save_path big_wnet_5e-3
-python train_consistency_loss.py --alpha_tv 0.0001 --model_name big_wnet --save_path big_wnet_1e-4
+python train_consistency_loss.py --alpha_tv 0.001  --model_name big_wnet --save_path big_wnet_1e-3

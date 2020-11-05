@@ -179,11 +179,10 @@ def train_model(model, optimizer, criterion, tv_criterion, train_loader, val_loa
 
         print('Train/Val Loss CE||TV: {:.4f}/{:.4f}||{:.4f}/{:.4f} -- AUC: {:.2f}/{:.2f} -- '
                                                                                'DICE: {:.2f}/{:.2f} -- '
-                                                                               'MCC: {:.2f}/{:.2f} -- LR={:.6f}'.format(
+                                                                               'MCC: {:.2f}/{:.2f}'.format(
                                                                                 tr_loss_ce, vl_loss_ce, tr_loss_tv, vl_loss_tv,
                                                                                 100*tr_auc, 100*vl_auc, 100*tr_dice,
-                                                                                100*vl_dice, 100*tr_mcc, 100*vl_mcc,
-                                                                                get_lr(optimizer)).rstrip('0'))
+                                                                                100*vl_dice, 100*tr_mcc, 100*vl_mcc))
         all_aucs.append(100 * vl_auc)
         all_dices.append(100 * vl_dice)
         all_mccs.append(100 * vl_mcc)

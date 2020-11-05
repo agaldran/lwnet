@@ -74,6 +74,8 @@ def evaluate(logits, labels):
     veins_bin = all_targets_np == 3
 
     print(all_preds_np[arts_bin].shape, all_preds_np[veins_bin].shape)
+    print(np.zeros_like(all_preds_np[arts_bin]).shape, np.ones(all_preds_np[veins_bin]).shape)
+    print('--')
     print(np.hstack([all_preds_np[arts_bin], all_preds_np[veins_bin]]).shape)
     print(np.hstack([np.zeros_like(arts_bin), np.ones_like(veins_bin)]).shape)
 

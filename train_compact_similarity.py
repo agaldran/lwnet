@@ -128,6 +128,8 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
 
         # Compute running loss
         running_loss += loss.item() * inputs.size(0)
+        running_loss_ce += loss_ce.item() * inputs.size(0)
+        running_loss_tv += tv_loss.item() * inputs.size(0)
         n_elems += inputs.size(0)
         run_loss_ce = running_loss_ce / n_elems
         run_loss_tv = running_loss_tv / n_elems

@@ -70,6 +70,14 @@ def evaluate(logits, labels):
     all_preds_np = 1 + all_preds_np  # we are predicting only three classes and ignoring background
     all_preds_np[all_targets_np == 0] = 0
 
+    arts_bin = all_targets_np == 2
+    veins_bin = all_targets_np == 3
+
+    all_preds_bin = np.cat([all_preds_np[arts_bin],all_preds_np[veins_bin]], axis=0)
+    all_targets_bin = np.cat([np.zeros_like(arts_bin),np.ones_like(veins_bin)], axis=0)
+
+    print(fast_auc(all_targets_bin, all_preds_bin))
+    sys.exit()
     return f1_score(all_targets_np, all_preds_np, average='weighted', labels=[1, 2, 3]), \
            mcc(all_targets_np[all_targets_np != 0], all_preds_np[all_targets_np != 0])
 

@@ -28,16 +28,11 @@ parser.add_argument('--grad_acc_steps', type=int, default=0, help='gradient accu
 parser.add_argument('--min_lr', type=float, default=1e-8, help='learning rate')
 parser.add_argument('--max_lr', type=float, default=0.01, help='learning rate')
 parser.add_argument('--cycle_lens', type=str, default='30/50', help='cycling config (nr cycles/cycle len')
-parser.add_argument('--metric', type=str, default='dice', help='which metric to use for monitoring progress (tr_auc/auc/loss/dice)')
+parser.add_argument('--metric', type=str, default='auc', help='which metric to use for monitoring progress (tr_auc/auc/loss/dice)')
 parser.add_argument('--im_size', help='delimited list input, could be 600,400', type=str, default='512')
 parser.add_argument('--do_not_save', type=str2bool, nargs='?', const=True, default=False, help='avoid saving anything')
 parser.add_argument('--save_path', type=str, default='date_time', help='path to save model (defaults to date/time')
-# these three are for training with pseudo-segmentations
-# e.g. --csv_test data/DRIVE/test.csv --path_test_preds results/DRIVE/experiments/wnet_drive
-# e.g. --csv_test data/LES_AV/test_all.csv --path_test_preds results/LES_AV/experiments/wnet_drive
-parser.add_argument('--csv_test', type=str, default=None, help='path to test data csv (for using pseudo labels)')
-parser.add_argument('--path_test_preds', type=str, default=None, help='path to test predictions (for using pseudo labels)')
-parser.add_argument('--checkpoint_folder', type=str, default=None, help='path to model to start training (with pseudo labels now)')
+parser.add_argument('--alpha_tv', type=float, default=0.01, help='weight of the TV loss component')
 parser.add_argument('--num_workers', type=int, default=0, help='number of parallel (multiprocessing) workers to launch for data loading tasks (handled by pytorch) [default: %(default)s]')
 parser.add_argument('--device', type=str, default='cuda:0', help='where to run the training code (e.g. "cpu" or "cuda:0") [default: %(default)s]')
 
@@ -71,7 +66,7 @@ def get_lr(optimizer):
     for param_group in optimizer.param_groups:
         return param_group['lr']
 
-def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
+def run_one_epoch(loader, model, criterion, tv_criterion, optimizer=None, scheduler=None,
         grad_acc_steps=0, assess=False):
     device='cuda' if next(model.parameters()).is_cuda else 'cpu'
     train = optimizer is not None  # if we are in training mode there will be an optimizer and train=True here
@@ -84,7 +79,6 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
 
 
     n_elems, running_loss, running_loss_ce, running_loss_tv = 0, 0, 0, 0
-    tv_criterion = TvLoss(reduction='mean')
     for i_batch, (inputs, labels) in enumerate(loader):
         inputs, labels = inputs.to(device), labels.unsqueeze(dim=1).to(device)
         logits = model(inputs)
@@ -101,10 +95,10 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
 
             loss_ce = loss_aux + criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
 
-            tv_loss_aux = 10 * tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels)
-            tv_loss = tv_loss_aux + 10*tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels)
+            tv_loss_aux = tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels)
+            tv_loss = tv_loss_aux + tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels)
             # loss = loss_ce
-            loss = loss_ce + 0.001 * tv_loss
+            loss = loss_ce + tv_criterion.alpha * tv_loss
 
         else: # not wnet
             sys.exit('code needs to be adapted to train models other than Wnet here')
@@ -130,7 +124,7 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
         # Compute running loss
         running_loss += loss.item() * inputs.size(0)
         running_loss_ce += loss_ce.item() * inputs.size(0)
-        running_loss_tv += tv_loss.item() * inputs.size(0)
+        running_loss_tv += 10*tv_loss.item() * inputs.size(0)
         n_elems += inputs.size(0)
         run_loss_ce = running_loss_ce / n_elems
         run_loss_tv = running_loss_tv / n_elems
@@ -139,7 +133,7 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
     if assess: return np.array(auc_scs).mean(), np.array(f1_scs).mean(), np.array(mcc_scs).mean(), run_loss_ce, run_loss_tv
     return None, None, None, run_loss_ce, run_loss_tv
 
-def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=None, grad_acc_steps=0, cycle=0):
+def train_one_cycle(train_loader, model, criterion, tv_criterion, optimizer=None, scheduler=None, grad_acc_steps=0, cycle=0):
 
     model.train()
     optimizer.zero_grad()
@@ -149,7 +143,7 @@ def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=No
             # print('Cycle {:d} | Epoch {:d}/{:d}'.format(cycle+1, epoch+1, cycle_len))
             if epoch == cycle_len-1: assess=True # only get logits/labels on last cycle
             else: assess = False
-            auc_sc, f1_sc, mcc_sc, tr_loss_ce, tr_loss_tv = run_one_epoch(train_loader, model, criterion, optimizer=optimizer,
+            auc_sc, f1_sc, mcc_sc, tr_loss_ce, tr_loss_tv = run_one_epoch(train_loader, model, criterion, tv_criterion, optimizer=optimizer,
                                                           scheduler=scheduler, grad_acc_steps=grad_acc_steps, assess=assess)
             t.set_postfix_str("Cycle: {}/{} Ep. {}/{} -- tr. loss CE/TV={:.4f}/{:.4f} || lr={:.6f}".format(cycle + 1,
                                                                                              len(scheduler.cycle_lens),
@@ -160,7 +154,7 @@ def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=No
             t.update()
     return auc_sc, f1_sc, mcc_sc, tr_loss_ce, tr_loss_tv
 
-def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler, grad_acc_steps, metric, exp_path):
+def train_model(model, optimizer, criterion, tv_criterion, train_loader, val_loader, scheduler, grad_acc_steps, metric, exp_path):
 
     n_cycles = len(scheduler.cycle_lens)
     best_auc, best_dice, best_mcc, best_cycle, all_aucs, all_dices, all_mccs = 0, 0, 0, 0, [], [], []
@@ -175,13 +169,13 @@ def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler
         scheduler.T_max = scheduler.cycle_lens[cycle] * len(train_loader)
 
         # train one cycle
-        _, _, _, _, _= train_one_cycle(train_loader, model, criterion, optimizer, scheduler, grad_acc_steps, cycle)
+        _, _, _, _, _= train_one_cycle(train_loader, model, criterion, tv_criterion, optimizer, scheduler, grad_acc_steps, cycle)
 
         # classification metrics at the end of cycle, both for train and val (it's relatively cheap)
         with torch.no_grad():
             assess=True
-            tr_auc, tr_dice, tr_mcc, tr_loss_ce, tr_loss_tv = run_one_epoch(train_loader, model, criterion, assess=assess)
-            vl_auc, vl_dice, vl_mcc, vl_loss_ce, vl_loss_tv = run_one_epoch(val_loader, model, criterion, assess=assess)
+            tr_auc, tr_dice, tr_mcc, tr_loss_ce, tr_loss_tv = run_one_epoch(train_loader, model, criterion, tv_criterion, assess=assess)
+            vl_auc, vl_dice, vl_mcc, vl_loss_ce, vl_loss_tv = run_one_epoch(val_loader, model, criterion, tv_criterion, assess=assess)
 
         print('Train/Val Loss CE||TV: {:.4f}/{:.4f}||{:.4f}/{:.4f} -- Train/Val AUC: {:.4f}/{:.4f} -- '
                                                                                'DICE: {:.4f}/{:.4f} -- '
@@ -301,39 +295,20 @@ if __name__ == '__main__':
     print("Total params: {0:,}".format(sum(p.numel() for p in model.parameters() if p.requires_grad)))
     optimizer = torch.optim.Adam(model.parameters(), lr=max_lr)
 
-    ### TRAINING WITH PSEUDO-LABELS
-    csv_test = args.csv_test
-    path_test_preds = args.path_test_preds
-    checkpoint_folder = args.checkpoint_folder
-    if csv_test is not None:
-        print('Training with pseudo-labels, completing training set with predictions on test set')
-        from utils.get_loaders import build_pseudo_dataset
-        tr_im_list, tr_gt_list, tr_mask_list = build_pseudo_dataset(csv_train, csv_test, path_test_preds)
-        train_loader.dataset.im_list = tr_im_list
-        train_loader.dataset.gt_list = tr_gt_list
-        train_loader.dataset.mask_list = tr_mask_list
-        print('* Loading weights from previous checkpoint={}'.format(checkpoint_folder))
-        model, stats, optimizer_state_dict = load_model(model, checkpoint_folder, device=device, with_opt=True)
-        optimizer.load_state_dict(optimizer_state_dict)
-        for i, param_group in enumerate(optimizer.param_groups):
-            param_group['lr'] = max_lr
-            param_group['initial_lr'] = max_lr
-
-
     scheduler = CosineAnnealingLR(optimizer, T_max=cycle_lens[0] * len(train_loader) // (grad_acc_steps + 1), eta_min=min_lr)
     setattr(optimizer, 'max_lr', max_lr)  # store it inside the optimizer for accessing to it later
     setattr(scheduler, 'cycle_lens', cycle_lens)
 
+    criterion = torch.nn.CrossEntropyLoss(ignore_index=0)
+    tv_criterion = TvLoss(reduction='mean', alpha=args.alpha_tv)
 
-    criterion = torch.nn.BCEWithLogitsLoss() if model.n_classes == 1 else torch.nn.CrossEntropyLoss(ignore_index=0)
-
-
-    print('* Instantiating loss function', str(criterion))
+    print('* Instantiating loss function', str(criterion), str(tv_criterion))
     print('* Starting to train\n','-' * 10)
 
 
     start = time.time()
-    m1, m2, m3, best_cyc, aucs, dices, mccs = train_model(model, optimizer, criterion, train_loader, val_loader, scheduler, grad_acc_steps, metric, experiment_path)
+    m1, m2, m3, best_cyc, aucs, dices, mccs = train_model(model, optimizer, criterion, tv_criterion, train_loader, val_loader,
+                                                          scheduler, grad_acc_steps, metric, experiment_path)
     end = time.time()
     hours, rem = divmod(end - start, 3600)
     minutes, seconds = divmod(rem, 60)

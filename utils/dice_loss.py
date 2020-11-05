@@ -185,10 +185,11 @@ class TvLoss(torch.nn.Module):
 
 
 class TvLoss(torch.nn.Module):
-    def __init__(self, ignore_background=True, reduction='mean'):
+    def __init__(self, alpha=0.01, eps=1e-6, reduction='mean'):
         super(TvLoss, self).__init__()
         self.reduction = reduction
-        self.ignore_background = ignore_background
+        self.alpha = alpha
+        self.eps = eps
 
     def compute_tv(self, logits, labels):
 
@@ -220,9 +221,9 @@ class TvLoss(torch.nn.Module):
         perfect_tv = self.compute_tv(100 * labels_oh, labels) > 0
         tv[perfect_tv] = 0
 
-        tv = torch.div(tv, probs + 1e-6)
+        tv = torch.div(tv, probs + self.eps)
 
-        mean_per_elem_per_class = (tv.sum(dim=(-2, -1)) / (labels_oh.sum(dim=(-2, -1)) + 1e-6))
+        mean_per_elem_per_class = (tv.sum(dim=(-2, -1)) / (labels_oh.sum(dim=(-2, -1)) + self.eps))
         mean_per_class = mean_per_elem_per_class.mean(dim=0)
 
         if self.reduction == 'mean':

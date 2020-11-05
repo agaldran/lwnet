@@ -73,17 +73,18 @@ def evaluate(logits, labels):
     arts_bin = all_targets_np == 2
     veins_bin = all_targets_np == 3
 
-    print(all_preds_np[arts_bin].shape, all_preds_np[veins_bin].shape)
-    print(np.zeros(all_preds_np[arts_bin].shape).shape, np.ones(all_preds_np[veins_bin].shape).shape)
-    print('--')
-    print(np.hstack([all_preds_np[arts_bin], all_preds_np[veins_bin]]).shape)
-    print(np.hstack([np.zeros(all_preds_np[arts_bin].shape), np.ones(all_preds_np[veins_bin].shape)]).shape)
-    import sys
-    sys.exit()
-    all_preds_bin = np.stack([all_preds_np[arts_bin],all_preds_np[veins_bin]], axis=0)
-    all_targets_bin = np.stack([np.zeros_like(arts_bin),np.ones_like(veins_bin)], axis=0)
+    # print(all_preds_np[arts_bin].shape, all_preds_np[veins_bin].shape)
+    # print(np.zeros(all_preds_np[arts_bin].shape).shape, np.ones(all_preds_np[veins_bin].shape).shape)
+    # print('--')
+    # print(np.hstack([all_preds_np[arts_bin], all_preds_np[veins_bin]]).shape)
+    # print(np.hstack([np.zeros(all_preds_np[arts_bin].shape), np.ones(all_preds_np[veins_bin].shape)]).shape)
+    # import sys
+    # sys.exit()
+    all_preds_bin = np.hstack([all_preds_np[arts_bin], all_preds_np[veins_bin]])
+    all_targets_bin = np.hstack([np.zeros(all_preds_np[arts_bin].shape), np.ones(all_preds_np[veins_bin].shape)])
 
     print(fast_auc(all_targets_bin, all_preds_bin))
+    import sys
     sys.exit()
     return f1_score(all_targets_np, all_preds_np, average='weighted', labels=[1, 2, 3]), \
            mcc(all_targets_np[all_targets_np != 0], all_preds_np[all_targets_np != 0])

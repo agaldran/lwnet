@@ -177,7 +177,7 @@ def train_model(model, optimizer, criterion, tv_criterion, train_loader, val_loa
             tr_auc, tr_dice, tr_mcc, tr_loss_ce, tr_loss_tv = run_one_epoch(train_loader, model, criterion, tv_criterion, assess=assess)
             vl_auc, vl_dice, vl_mcc, vl_loss_ce, vl_loss_tv = run_one_epoch(val_loader, model, criterion, tv_criterion, assess=assess)
 
-        print('Train/Val Loss CE||TV: {:.4f}/{:.4f}||{:.4f}/{:.4f} -- Train/Val AUC: {:.4f}/{:.4f} -- '
+        print('Train/Val Loss CE||TV: {:.4f}/{:.4f}||{:.4f}/{:.4f} -- AUC: {:.4f}/{:.4f} -- '
                                                                                'DICE: {:.4f}/{:.4f} -- '
                                                                                'MCC: {:.4f}/{:.4f} -- LR={:.6f}'.format(
                                                                                 tr_loss_ce, vl_loss_ce, tr_loss_tv, vl_loss_tv,

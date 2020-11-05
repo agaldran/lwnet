@@ -86,7 +86,7 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
     n_elems, running_loss, running_loss_ce, running_loss_tv = 0, 0, 0, 0
     tv_criterion = TvLoss(reduction='mean')
     for i_batch, (inputs, labels) in enumerate(loader):
-        inputs, labels = inputs.to(device), labels.to(device)
+        inputs, labels = inputs.to(device), labels.unsqueeze(dim=1).to(device)
         logits = model(inputs)
 
         if isinstance(logits, tuple): # wnet
@@ -96,12 +96,12 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
                 labels_aux = labels != 0
                 loss_aux = torch.nn.BCEWithLogitsLoss()(logits_aux.squeeze(), labels_aux.float())
             elif model.compose=='cat':
-                loss_aux = criterion(torch.cat([-10 * torch.ones(labels.unsqueeze(dim=1).shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
+                loss_aux = criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
                 # loss_aux = criterion(logits_aux, labels)
 
-            loss_ce = loss_aux + criterion(torch.cat([-10 * torch.ones(labels.unsqueeze(dim=1).shape).to(device), logits], dim=1), labels.squeeze())
+            loss_ce = loss_aux + criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
 
-            tv_loss = tv_criterion(torch.cat([-10 * torch.ones(labels.unsqueeze(dim=1).shape).to(device), logits], dim=1), labels)
+            tv_loss = tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels)
             # loss = loss_ce
             loss = loss_ce+tv_loss
 

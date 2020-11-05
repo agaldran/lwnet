@@ -80,7 +80,7 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
         model.train()
     else:
         model.eval()
-    if assess: f1_scs, mcc_scs = [], []
+    if assess: auc_scs, f1_scs, mcc_scs = [], [], []
 
 
     n_elems, running_loss, running_loss_ce, running_loss_tv = 0, 0, 0, 0
@@ -122,7 +122,8 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
                 for _ in range(grad_acc_steps+1): scheduler.step() # for grad_acc_steps=0, this means once
                 optimizer.zero_grad()
         if assess:
-            f1_s, mcc_s = evaluate(logits.detach().cpu(), labels.cpu())
+            auc_s, f1_s, mcc_s = evaluate(logits.detach().cpu(), labels.cpu())
+            auc_scs.append(auc_s)
             f1_scs.append(f1_s)
             mcc_scs.append(mcc_s)
 
@@ -135,8 +136,8 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
         run_loss_tv = running_loss_tv / n_elems
         run_loss = running_loss / n_elems
 
-    if assess: return np.array(f1_scs).mean(), np.array(mcc_scs).mean(), run_loss_ce, run_loss_tv
-    return None, None, run_loss_ce, run_loss_tv
+    if assess: return np.array(auc_scs).mean(), np.array(f1_scs).mean(), np.array(mcc_scs).mean(), run_loss_ce, run_loss_tv
+    return None, None, None, run_loss_ce, run_loss_tv
 
 def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=None, grad_acc_steps=0, cycle=0):
 
@@ -148,7 +149,7 @@ def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=No
             # print('Cycle {:d} | Epoch {:d}/{:d}'.format(cycle+1, epoch+1, cycle_len))
             if epoch == cycle_len-1: assess=True # only get logits/labels on last cycle
             else: assess = False
-            f1_sc, mcc_sc, tr_loss_ce, tr_loss_tv = run_one_epoch(train_loader, model, criterion, optimizer=optimizer,
+            auc_sc, f1_sc, mcc_sc, tr_loss_ce, tr_loss_tv = run_one_epoch(train_loader, model, criterion, optimizer=optimizer,
                                                           scheduler=scheduler, grad_acc_steps=grad_acc_steps, assess=assess)
             t.set_postfix_str("Cycle: {}/{} Ep. {}/{} -- tr. loss CE/TV={:.4f}/{:.4f} || lr={:.6f}".format(cycle + 1,
                                                                                              len(scheduler.cycle_lens),
@@ -157,7 +158,7 @@ def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=No
                                                                                             float(tr_loss_tv),
                                                                                              get_lr(optimizer)))
             t.update()
-    return f1_sc, mcc_sc, tr_loss_ce, tr_loss_tv
+    return auc_sc, f1_sc, mcc_sc, tr_loss_ce, tr_loss_tv
 
 def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler, grad_acc_steps, metric, exp_path):
 
@@ -174,16 +175,20 @@ def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler
         scheduler.T_max = scheduler.cycle_lens[cycle] * len(train_loader)
 
         # train one cycle
-        _, _, _, _= train_one_cycle(train_loader, model, criterion, optimizer, scheduler, grad_acc_steps, cycle)
+        _, _, _, _, _= train_one_cycle(train_loader, model, criterion, optimizer, scheduler, grad_acc_steps, cycle)
 
         # classification metrics at the end of cycle, both for train and val (it's relatively cheap)
         with torch.no_grad():
             assess=True
-            tr_dice, tr_mcc, tr_loss_ce, tr_loss_tv = run_one_epoch(train_loader, model, criterion, assess=assess)
-            vl_dice, vl_mcc, vl_loss_ce, vl_loss_tv = run_one_epoch(val_loader, model, criterion, assess=assess)
+            tr_auc, tr_dice, tr_mcc, tr_loss_ce, tr_loss_tv = run_one_epoch(train_loader, model, criterion, assess=assess)
+            vl_auc, vl_dice, vl_mcc, vl_loss_ce, vl_loss_tv = run_one_epoch(val_loader, model, criterion, assess=assess)
 
-        print('Train/Val Loss CE||TV: {:.4f}/{:.4f}||{:.4f}/{:.4f} -- Train/Val DICE: {:.4f}/{:.4f} -- Train/Val MCC: {:.4f}/{:.4f} -- LR={:.6f}'.format(
-            tr_loss_ce, vl_loss_ce, tr_loss_tv, vl_loss_tv, tr_dice, vl_dice, tr_mcc, vl_mcc,  get_lr(optimizer)).rstrip('0'))
+        print('Train/Val Loss CE||TV: {:.4f}/{:.4f}||{:.4f}/{:.4f} -- Train/Val AUC: {:.4f}/{:.4f} -- '
+                                                                               'DICE: {:.4f}/{:.4f} -- '
+                                                                               'MCC: {:.4f}/{:.4f} -- LR={:.6f}'.format(
+                                                                                tr_loss_ce, vl_loss_ce, tr_loss_tv, vl_loss_tv,
+                                                                                tr_auc, vl_auc, tr_dice, vl_dice, tr_mcc, vl_mcc,
+                                                                                get_lr(optimizer)).rstrip('0'))
         all_dices.append(100 * vl_dice)
 
         # check if performance was better than anyone before and checkpoint if so

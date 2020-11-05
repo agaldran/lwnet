@@ -11,6 +11,7 @@ __pycache__
 
 data_old
 data
+*.pth
 
 # Ignore result directories
 # experiments/

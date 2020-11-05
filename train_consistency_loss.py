@@ -177,11 +177,12 @@ def train_model(model, optimizer, criterion, tv_criterion, train_loader, val_loa
             tr_auc, tr_dice, tr_mcc, tr_loss_ce, tr_loss_tv = run_one_epoch(train_loader, model, criterion, tv_criterion, assess=assess)
             vl_auc, vl_dice, vl_mcc, vl_loss_ce, vl_loss_tv = run_one_epoch(val_loader, model, criterion, tv_criterion, assess=assess)
 
-        print('Train/Val Loss CE||TV: {:.4f}/{:.4f}||{:.4f}/{:.4f} -- AUC: {:.4f}/{:.4f} -- '
-                                                                               'DICE: {:.4f}/{:.4f} -- '
-                                                                               'MCC: {:.4f}/{:.4f} -- LR={:.6f}'.format(
+        print('Train/Val Loss CE||TV: {:.4f}/{:.4f}||{:.4f}/{:.4f} -- AUC: {:.2f}/{:.2f} -- '
+                                                                               'DICE: {:.2f}/{:.2f} -- '
+                                                                               'MCC: {:.2f}/{:.2f} -- LR={:.6f}'.format(
                                                                                 tr_loss_ce, vl_loss_ce, tr_loss_tv, vl_loss_tv,
-                                                                                tr_auc, vl_auc, tr_dice, vl_dice, tr_mcc, vl_mcc,
+                                                                                100*tr_auc, 100*vl_auc, 100*tr_dice,
+                                                                                100*vl_dice, 100*tr_mcc, 100*vl_mcc,
                                                                                 get_lr(optimizer)).rstrip('0'))
         all_aucs.append(100 * vl_auc)
         all_dices.append(100 * vl_dice)

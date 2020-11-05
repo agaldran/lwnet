@@ -184,6 +184,56 @@ class TvLoss(torch.nn.Module):
             sys.exit('not a valid reduction scheme')
 
 
+class TvLoss(torch.nn.Module):
+    def __init__(self, ignore_background=True, reduction='mean'):
+        super(TvLoss, self).__init__()
+        self.reduction = reduction
+        self.ignore_background = ignore_background
+
+    def compute_tv(self, logits, labels):
+
+        probs = torch.nn.Softmax(dim=1)(logits)
+        labels_oh = torch.cat([labels == 0, labels == 1, labels == 2, labels == 3], dim=1).long()
+
+        probs = torch.mul(probs, labels_oh)  # discard values outside labels
+
+        #     foreground = torch.cat([labels!=0, labels!=0, labels!=0, labels!=0], dim=1).long()
+        #     probs_filtered = torch.mul(probs, foreground) # discard values outside vessels
+
+        tv_l = torch.abs(torch.sub(probs, torch.roll(probs, shifts=1, dims=-1)))
+        tv_r = torch.abs(torch.sub(probs, torch.roll(probs, shifts=-1, dims=-1)))
+
+        tv_u = torch.abs(torch.sub(probs, torch.roll(probs, shifts=-1, dims=-2)))
+        tv_d = torch.abs(torch.sub(probs, torch.roll(probs, shifts=1, dims=-2)))
+        #     tv_d = torch.clamp(tv_d, min=0, max=1)
+
+        tv = torch.mean(torch.stack([tv_l, tv_r, tv_u, tv_d], axis=0), dim=0)
+
+        return tv
+
+    def forward(self, logits, labels):
+        probs = torch.nn.Softmax(dim=1)(logits)
+        labels_oh = torch.cat([labels == 0, labels == 1, labels == 2, labels == 3], dim=1).float()
+
+        tv = self.compute_tv(logits, labels)
+
+        perfect_tv = self.compute_tv(100 * labels_oh, labels) > 0
+        tv[perfect_tv] = 0
+
+        tv = torch.div(tv, probs + 1e-6)
+
+        mean_per_elem_per_class = (tv.sum(dim=(-2, -1)) / (labels_oh.sum(dim=(-2, -1)) + 1e-6))
+        mean_per_class = mean_per_elem_per_class.mean(dim=0)
+
+        if self.reduction == 'mean':
+            return mean_per_class[2:].mean()
+        elif self.reduction == 'per_class':
+            return mean_per_class[2:]
+        elif self.reduction == 'per_elem_per_class':
+            return mean_per_elem_per_class[:, 2:]
+        elif self.reduction == 'none':
+            return tv
+
 class SimilarityLoss(torch.nn.Module):
     def __init__(self, with_probs=True, reduction='mean'):
         super(SimilarityLoss, self).__init__()

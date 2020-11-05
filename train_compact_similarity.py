@@ -82,8 +82,9 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
         model.eval()
     if assess: f1_scs, mcc_scs = [], []
 
-    n_elems, running_loss = 0, 0
-    sim_loss = SimilarityLoss()
+
+    n_elems, running_loss, running_loss_ce, running_loss_tv = 0, 0, 0, 0
+    tv_criterion = TvLoss(reduction='mean')
     for i_batch, (inputs, labels) in enumerate(loader):
         inputs, labels = inputs.to(device), labels.to(device)
         logits = model(inputs)
@@ -98,10 +99,11 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
                 loss_aux = criterion(torch.cat([-10 * torch.ones(labels.unsqueeze(dim=1).shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
                 # loss_aux = criterion(logits_aux, labels)
 
-            loss = loss_aux + criterion(torch.cat([-10 * torch.ones(labels.unsqueeze(dim=1).shape).to(device), logits], dim=1), labels.squeeze())
+            loss_ce = loss_aux + criterion(torch.cat([-10 * torch.ones(labels.unsqueeze(dim=1).shape).to(device), logits], dim=1), labels.squeeze())
 
-            loss_s = 100 * (1 - sim_loss(torch.cat([-10 * torch.ones(labels.unsqueeze(dim=1).shape).to(device), logits], dim=1), labels.squeeze()))
-            loss += loss_s
+            tv_loss = tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels)
+            # loss = loss_ce
+            loss = loss_ce+tv_loss
 
             # loss = loss_aux + criterion(logits, labels)
         else: # not wnet
@@ -127,10 +129,12 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
         # Compute running loss
         running_loss += loss.item() * inputs.size(0)
         n_elems += inputs.size(0)
+        run_loss_ce = running_loss_ce / n_elems
+        run_loss_tv = running_loss_tv / n_elems
         run_loss = running_loss / n_elems
 
-    if assess: return np.array(f1_scs).mean(), np.array(mcc_scs).mean(), run_loss
-    return None, None, run_loss
+    if assess: return np.array(f1_scs).mean(), np.array(mcc_scs).mean(), run_loss_ce, run_loss_tv
+    return None, None, run_loss_ce, run_loss_tv
 
 def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=None, grad_acc_steps=0, cycle=0):
 
@@ -142,15 +146,16 @@ def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=No
             # print('Cycle {:d} | Epoch {:d}/{:d}'.format(cycle+1, epoch+1, cycle_len))
             if epoch == cycle_len-1: assess=True # only get logits/labels on last cycle
             else: assess = False
-            f1_sc, mcc_sc, tr_loss = run_one_epoch(train_loader, model, criterion, optimizer=optimizer,
+            f1_sc, mcc_sc, tr_loss_ce, tr_loss_tv = run_one_epoch(train_loader, model, criterion, optimizer=optimizer,
                                                           scheduler=scheduler, grad_acc_steps=grad_acc_steps, assess=assess)
-            t.set_postfix_str("Cycle: {}/{} Ep. {}/{} -- tr. loss={:.4f} / lr={:.6f}".format(cycle + 1,
+            t.set_postfix_str("Cycle: {}/{} Ep. {}/{} -- tr. loss CE/TV={:.4f}/{:.4f} || lr={:.6f}".format(cycle + 1,
                                                                                              len(scheduler.cycle_lens),
                                                                                              epoch + 1, cycle_len,
-                                                                                             float(tr_loss),
+                                                                                             float(tr_loss_ce),
+                                                                                            float(tr_loss_tv),
                                                                                              get_lr(optimizer)))
             t.update()
-    return f1_sc, mcc_sc, tr_loss
+    return f1_sc, mcc_sc, tr_loss_ce, tr_loss_tv
 
 def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler, grad_acc_steps, metric, exp_path):
 
@@ -167,23 +172,23 @@ def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler
         scheduler.T_max = scheduler.cycle_lens[cycle] * len(train_loader)
 
         # train one cycle
-        _, _, _= train_one_cycle(train_loader, model, criterion, optimizer, scheduler, grad_acc_steps, cycle)
+        _, _, _, _= train_one_cycle(train_loader, model, criterion, optimizer, scheduler, grad_acc_steps, cycle)
 
         # classification metrics at the end of cycle, both for train and val (it's relatively cheap)
         with torch.no_grad():
             assess=True
-            tr_dice, tr_mcc, tr_loss = run_one_epoch(train_loader, model, criterion, assess=assess)
-            vl_dice, vl_mcc, vl_loss = run_one_epoch(val_loader, model, criterion, assess=assess)
+            tr_dice, tr_mcc, tr_loss_ce, tr_loss_tv = run_one_epoch(train_loader, model, criterion, assess=assess)
+            vl_dice, vl_mcc, vl_loss_ce, vl_loss_tv = run_one_epoch(val_loader, model, criterion, assess=assess)
 
-        print('Train/Val Loss: {:.4f}/{:.4f} -- Train/Val DICE: {:.4f}/{:.4f} -- Train/Val MCC: {:.4f}/{:.4f} -- LR={:.6f}'.format(
-                tr_loss, vl_loss, tr_dice, vl_dice, tr_mcc, vl_mcc,  get_lr(optimizer)).rstrip('0'))
+        print('Train/Val Loss CE||TV: {:.4f}/{:.4f}||{:.4f}/{:.4f} -- Train/Val DICE: {:.4f}/{:.4f} -- Train/Val MCC: {:.4f}/{:.4f} -- LR={:.6f}'.format(
+            tr_loss_ce, vl_loss_ce, tr_loss_tv, vl_loss_tv, tr_dice, vl_dice, tr_mcc, vl_mcc,  get_lr(optimizer)).rstrip('0'))
         all_dices.append(100 * vl_dice)
 
         # check if performance was better than anyone before and checkpoint if so
         if metric == 'mcc':
             monitoring_metric = vl_mcc
         elif metric == 'loss':
-            monitoring_metric = vl_loss
+            monitoring_metric = tr_loss_ce
         elif metric == 'dice':
             monitoring_metric = vl_dice
         if is_better(monitoring_metric, best_monitoring_metric):

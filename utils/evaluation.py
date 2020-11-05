@@ -73,8 +73,8 @@ def evaluate(logits, labels):
     arts_bin = all_targets_np == 2
     veins_bin = all_targets_np == 3
 
-    all_preds_bin = np.cat([all_preds_np[arts_bin],all_preds_np[veins_bin]], axis=0)
-    all_targets_bin = np.cat([np.zeros_like(arts_bin),np.ones_like(veins_bin)], axis=0)
+    all_preds_bin = np.stack([all_preds_np[arts_bin],all_preds_np[veins_bin]], axis=0)
+    all_targets_bin = np.stack([np.zeros_like(arts_bin),np.ones_like(veins_bin)], axis=0)
 
     print(fast_auc(all_targets_bin, all_preds_bin))
     sys.exit()

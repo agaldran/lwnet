@@ -49,7 +49,7 @@ def compare_op(metric):
     '''
     if metric == 'auc':
         return operator.gt, 0
-    elif metric == 'tr_auc':
+    elif metric == 'mcc':
         return operator.gt, 0
     elif metric == 'dice':
         return operator.gt, 0
@@ -163,7 +163,7 @@ def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=No
 def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler, grad_acc_steps, metric, exp_path):
 
     n_cycles = len(scheduler.cycle_lens)
-    best_mcc, best_dice, best_cycle, all_dices = 0, 0, 0, []
+    best_auc, best_dice, best_mcc, best_cycle, all_aucs, all_dices, all_mccs = 0, 0, 0, 0, [], [], []
     is_better, best_monitoring_metric = compare_op(metric)
 
     for cycle in range(n_cycles):
@@ -189,18 +189,23 @@ def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler
                                                                                 tr_loss_ce, vl_loss_ce, tr_loss_tv, vl_loss_tv,
                                                                                 tr_auc, vl_auc, tr_dice, vl_dice, tr_mcc, vl_mcc,
                                                                                 get_lr(optimizer)).rstrip('0'))
+        all_aucs.append(100 * vl_auc)
         all_dices.append(100 * vl_dice)
+        all_mccs.append(100 * vl_mcc)
 
         # check if performance was better than anyone before and checkpoint if so
         if metric == 'mcc':
             monitoring_metric = vl_mcc
         elif metric == 'loss':
             monitoring_metric = tr_loss_ce
+        elif metric == 'auc':
+            monitoring_metric = vl_auc
         elif metric == 'dice':
             monitoring_metric = vl_dice
+
         if is_better(monitoring_metric, best_monitoring_metric):
             print('Best {} attained. {:.2f} --> {:.2f}'.format(metric, 100*best_monitoring_metric, 100*monitoring_metric))
-            best_dice, best_mcc, best_cycle = vl_dice, vl_mcc, cycle+1
+            best_auc, best_dice, best_mcc, best_cycle = vl_auc, vl_dice, vl_mcc, cycle+1
             best_monitoring_metric = monitoring_metric
             if exp_path is not None:
                 print(15 * '-', ' Checkpointing ', 15 * '-')
@@ -210,7 +215,7 @@ def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler
 
     del model
     torch.cuda.empty_cache()
-    return best_dice, best_mcc, best_cycle, all_dices
+    return best_auc, best_dice, best_mcc, best_cycle, all_aucs, all_dices, all_mccs
 
 if __name__ == '__main__':
     '''
@@ -328,23 +333,18 @@ if __name__ == '__main__':
 
 
     start = time.time()
-    m1, m2, m3, dices=train_model(model, optimizer, criterion, train_loader, val_loader, scheduler, grad_acc_steps, metric, experiment_path)
+    m1, m2, m3, best_cyc, aucs, dices, mccs = train_model(model, optimizer, criterion, train_loader, val_loader, scheduler, grad_acc_steps, metric, experiment_path)
     end = time.time()
     hours, rem = divmod(end - start, 3600)
     minutes, seconds = divmod(rem, 60)
 
-    print("val_dice: %f" % m1)
-    print("val_mcc: %f" % m2)
-    print("best_cycle: %d" % m3)
+    print("val_auc: %f" % m1)
+    print("val_dice: %f" % m2)
+    print("val_mcc: %f" % m3)
+    print("best_cycle: %d" % best_cyc)
     if do_not_save is False:
-        # file = open(osp.join(experiment_path, 'val_metrics.txt'), 'w')
-        # file.write(str(m1)+ '\n')
-        # file.write(str(m2)+ '\n')
-        # file.write(str(m3)+ '\n')
-        # file.close()
-
         with open(osp.join(experiment_path, 'val_metrics.txt'), 'w') as f:
-            print('Best DICE = {:.2f}\nBest MCC = {:.2f}\nBest cycle = {}'.format(100*m1, 100*m2, m3), file=f)
+            print('Best AUC = {:.2f}\n, Best DICE = {:.2f}\nBest MCC = {:.2f}\nBest cycle = {}'.format(100*m1, 100*m2, m3), file=f)
             for j in range(len(dices)):
-                print('\nEpoch = {} -> Dice = {:.2f}'.format(j, dices[j]), file=f)
+                print('\nEpoch = {} -> AUC = {:.2f}, Dice = {:.2f}, MCC = {:.2f}'.format(j, aucs[j],dices[j], mccs[j]), file=f)
             print('\nTraining time: {:0>2}h {:0>2}min {:05.2f}secs'.format(int(hours), int(minutes), seconds), file=f)

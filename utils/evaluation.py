@@ -73,13 +73,6 @@ def evaluate(logits, labels):
     arts_bin = all_targets_np == 2
     veins_bin = all_targets_np == 3
 
-    # print(all_preds_np[arts_bin].shape, all_preds_np[veins_bin].shape)
-    # print(np.zeros(all_preds_np[arts_bin].shape).shape, np.ones(all_preds_np[veins_bin].shape).shape)
-    # print('--')
-    # print(np.hstack([all_preds_np[arts_bin], all_preds_np[veins_bin]]).shape)
-    # print(np.hstack([np.zeros(all_preds_np[arts_bin].shape), np.ones(all_preds_np[veins_bin].shape)]).shape)
-    # import sys
-    # sys.exit()
     all_preds_bin = np.hstack([all_preds_np[arts_bin], all_preds_np[veins_bin]])
     all_targets_bin = np.hstack([np.zeros(all_preds_np[arts_bin].shape), np.ones(all_preds_np[veins_bin].shape)])
 

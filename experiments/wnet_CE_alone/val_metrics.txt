@@ -1,5 +1,5 @@
 Best AUC = 87.90
-, Best DICE = 87.16
+Best DICE = 87.16
 Best MCC = 74.91
 Best cycle = 30
 

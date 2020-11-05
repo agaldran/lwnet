@@ -319,7 +319,7 @@ if __name__ == '__main__':
     print("best_cycle: %d" % best_cyc)
     if do_not_save is False:
         with open(osp.join(experiment_path, 'val_metrics.txt'), 'w') as f:
-            print('Best AUC = {:.2f}\n, Best DICE = {:.2f}\nBest MCC = {:.2f}\nBest cycle = {}'.format(100*m1, 100*m2, 100*m3, best_cyc), file=f)
+            print('Best AUC = {:.2f}\nBest DICE = {:.2f}\nBest MCC = {:.2f}\nBest cycle = {}'.format(100*m1, 100*m2, 100*m3, best_cyc), file=f)
             for j in range(len(dices)):
                 print('\nEpoch = {} -> AUC = {:.2f}, Dice = {:.2f}, MCC = {:.2f}'.format(j, aucs[j],dices[j], mccs[j]), file=f)
             print('\nTraining time: {:0>2}h {:0>2}min {:05.2f}secs'.format(int(hours), int(minutes), seconds), file=f)

@@ -103,8 +103,8 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
 
             tv_loss = 10*tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels)
             # loss = loss_ce
-            loss = loss_ce+0.005*tv_loss
-
+        # loss = loss_ce+0.005*tv_loss
+            loss = tv_loss
             # loss = loss_aux + criterion(logits, labels)
         else: # not wnet
             sys.exit('code needs to be adapted to train models other than Wnet here')

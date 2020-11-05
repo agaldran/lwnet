@@ -77,8 +77,9 @@ def evaluate(logits, labels):
     print(np.zeros(all_preds_np[arts_bin].shape).shape, np.ones(all_preds_np[veins_bin].shape).shape)
     print('--')
     print(np.hstack([all_preds_np[arts_bin], all_preds_np[veins_bin]]).shape)
-    print(np.hstack([np.zeros_like(arts_bin), np.ones_like(veins_bin)]).shape)
-
+    print(np.hstack([np.zeros(all_preds_np[arts_bin].shape), np.ones(all_preds_np[veins_bin].shape)]).shape)
+    import sys
+    sys.exit()
     all_preds_bin = np.stack([all_preds_np[arts_bin],all_preds_np[veins_bin]], axis=0)
     all_targets_bin = np.stack([np.zeros_like(arts_bin),np.ones_like(veins_bin)], axis=0)
 

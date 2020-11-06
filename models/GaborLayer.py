@@ -1,3 +1,5 @@
+# taken from https://github.com/iKintosh/GaborNet, please cite properly
+
 import math
 from typing import Any
 

@@ -26,9 +26,10 @@ parser.add_argument('--model_name', type=str, default='big_wnet', help='architec
 parser.add_argument('--batch_size', type=int, default=4, help='batch Size')
 parser.add_argument('--grad_acc_steps', type=int, default=0, help='gradient accumulation steps (0)')
 parser.add_argument('--alpha_tv', type=float, default=0.01, help='weight of the TV loss component')
+parser.add_argument('--eps_tv', type=float, default=0.01, help='weight of the TV loss component')
 parser.add_argument('--min_lr', type=float, default=1e-8, help='learning rate')
 parser.add_argument('--max_lr', type=float, default=0.01, help='learning rate')
-parser.add_argument('--cycle_lens', type=str, default='30/50', help='cycling config (nr cycles/cycle len')
+parser.add_argument('--cycle_lens', type=str, default='40/50', help='cycling config (nr cycles/cycle len')
 parser.add_argument('--metric', type=str, default='auc', help='which metric to use for monitoring progress (tr_auc/auc/loss/dice)')
 parser.add_argument('--im_size', help='delimited list input, could be 600,400', type=str, default='512')
 parser.add_argument('--do_not_save', type=str2bool, nargs='?', const=True, default=False, help='avoid saving anything')
@@ -298,7 +299,7 @@ if __name__ == '__main__':
     setattr(scheduler, 'cycle_lens', cycle_lens)
 
     criterion = torch.nn.CrossEntropyLoss()
-    tv_criterion = TvLoss(reduction='mean', alpha=args.alpha_tv)
+    tv_criterion = TvLoss(reduction='mean', alpha=args.alpha_tv, eps = args.eps_tv)
 
     print('* Instantiating loss function', str(criterion), str(tv_criterion))
     print('* Starting to train\n','-' * 10)

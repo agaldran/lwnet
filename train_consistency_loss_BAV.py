@@ -25,6 +25,7 @@ parser.add_argument('--csv_train', type=str, default='data/DRIVE/train_av.csv', 
 parser.add_argument('--model_name', type=str, default='big_wnet', help='architecture')
 parser.add_argument('--batch_size', type=int, default=4, help='batch Size')
 parser.add_argument('--grad_acc_steps', type=int, default=0, help='gradient accumulation steps (0)')
+parser.add_argument('--alpha_tv', type=float, default=0.01, help='weight of the TV loss component')
 parser.add_argument('--min_lr', type=float, default=1e-8, help='learning rate')
 parser.add_argument('--max_lr', type=float, default=0.01, help='learning rate')
 parser.add_argument('--cycle_lens', type=str, default='30/50', help='cycling config (nr cycles/cycle len')
@@ -32,7 +33,6 @@ parser.add_argument('--metric', type=str, default='auc', help='which metric to u
 parser.add_argument('--im_size', help='delimited list input, could be 600,400', type=str, default='512')
 parser.add_argument('--do_not_save', type=str2bool, nargs='?', const=True, default=False, help='avoid saving anything')
 parser.add_argument('--save_path', type=str, default='date_time', help='path to save model (defaults to date/time')
-parser.add_argument('--alpha_tv', type=float, default=0.01, help='weight of the TV loss component')
 parser.add_argument('--num_workers', type=int, default=0, help='number of parallel (multiprocessing) workers to launch for data loading tasks (handled by pytorch) [default: %(default)s]')
 parser.add_argument('--device', type=str, default='cuda:0', help='where to run the training code (e.g. "cpu" or "cuda:0") [default: %(default)s]')
 
@@ -86,14 +86,15 @@ def run_one_epoch(loader, model, criterion, tv_criterion, optimizer=None, schedu
         if isinstance(logits, tuple): # wnet
             logits_aux, logits = logits
             # CrossEntropyLoss() -> A/V segmentation
+            
             loss_aux = criterion(logits_aux, labels.squeeze(dim=1))
-
             loss_ce = loss_aux + criterion(logits, labels.squeeze(dim=1))
 
             tv_loss_aux = tv_criterion(logits_aux, labels)
-            tv_loss = tv_loss_aux + tv_criterion(logits, labels)
+            tv_loss = tv_criterion.alpha *(tv_loss_aux + tv_criterion(logits, labels))
+
             # loss = loss_ce
-            loss = loss_ce + tv_criterion.alpha * tv_loss
+            loss = loss_ce + tv_loss
 
         else: # not wnet
             sys.exit('code needs to be adapted to train models other than Wnet here')
@@ -289,6 +290,7 @@ if __name__ == '__main__':
 
     print("Total params: {0:,}".format(sum(p.numel() for p in model.parameters() if p.requires_grad)))
     optimizer = torch.optim.Adam(model.parameters(), lr=max_lr)
+    # optimizer = torch.optim.SGD(model.parameters(), lr=max_lr)
 
     scheduler = CosineAnnealingLR(optimizer, T_max=cycle_lens[0] * len(train_loader) // (grad_acc_steps + 1), eta_min=min_lr)
     setattr(optimizer, 'max_lr', max_lr)  # store it inside the optimizer for accessing to it later

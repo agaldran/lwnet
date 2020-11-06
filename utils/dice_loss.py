@@ -198,27 +198,11 @@ class TvLoss(torch.nn.Module):
 
         probs = torch.mul(probs, labels_oh)  # discard values outside labels
 
-        #     foreground = torch.cat([labels!=0, labels!=0, labels!=0, labels!=0], dim=1).long()
-        #     probs_filtered = torch.mul(probs, foreground) # discard values outside vessels
-
-        # other_probs = torch.ones_like(probs)
-        # other_probs[labels_oh==0]=1
-        # other_probs[labels_oh==1]=probs[labels_oh==1]
-        # probs = other_probs
-
         tv_l = torch.abs(torch.sub(probs, torch.roll(probs, shifts=1, dims=-1)))
         tv_r = torch.abs(torch.sub(probs, torch.roll(probs, shifts=-1, dims=-1)))
         tv_u = torch.abs(torch.sub(probs, torch.roll(probs, shifts=-1, dims=-2)))
         tv_d = torch.abs(torch.sub(probs, torch.roll(probs, shifts=1, dims=-2)))
         tv = torch.mean(torch.stack([tv_l, tv_r, tv_u, tv_d], axis=0), dim=0)
-        # tv, _ = torch.max(torch.stack([tv_l, tv_r, tv_u, tv_d], axis=0), dim=0)
-
-        # tv_lu = torch.abs(torch.sub(probs, torch.roll(probs, shifts=(1, 1), dims=(2, 3))))
-        # tv_rd = torch.abs(torch.sub(probs, torch.roll(probs, shifts=(-1, -1), dims=(2, 3))))
-        # tv_ru = torch.abs(torch.sub(probs, torch.roll(probs, shifts=(1, -1), dims=(2, 3))))
-        # tv_dl = torch.abs(torch.sub(probs, torch.roll(probs, shifts=(-1, 1), dims=(2, 3))))
-        # tv,_ = torch.max(torch.stack([tv_l, tv_r, tv_u, tv_d, tv_lu, tv_rd, tv_ru, tv_dl], dim=0), dim=0)
-
 
         return tv
 
@@ -237,7 +221,8 @@ class TvLoss(torch.nn.Module):
         mean_per_class = mean_per_elem_per_class.mean(dim=0)
 
         if self.reduction == 'mean':
-            return mean_per_class[2:].mean()
+            return mean_per_class[0:].mean()
+            # return mean_per_class[2:].mean()
         elif self.reduction == 'per_class':
             return mean_per_class[2:]
         elif self.reduction == 'per_elem_per_class':

@@ -185,7 +185,8 @@ class TvLoss(torch.nn.Module):
 
 
 class TvLoss(torch.nn.Module):
-    def __init__(self, alpha=0.01, eps=1e-6, reduction='mean'):
+    # def __init__(self, alpha=0.01, eps=1e-6, reduction='mean'):
+    def __init__(self, alpha=0.01, eps=1e-1, reduction='mean'):
         super(TvLoss, self).__init__()
         self.reduction = reduction
         self.alpha = alpha
@@ -221,8 +222,7 @@ class TvLoss(torch.nn.Module):
         mean_per_class = mean_per_elem_per_class.mean(dim=0)
 
         if self.reduction == 'mean':
-            return mean_per_class[0:].mean()
-            # return mean_per_class[2:].mean()
+            return mean_per_class[2:].mean()
         elif self.reduction == 'per_class':
             return mean_per_class[2:]
         elif self.reduction == 'per_elem_per_class':

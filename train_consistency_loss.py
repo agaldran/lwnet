@@ -297,12 +297,13 @@ if __name__ == '__main__':
     # optimizer = torch.optim.SGD(model.parameters(), lr=max_lr)
     from monai.optimizers import Novograd
     optimizer = Novograd(model.parameters(), lr=max_lr)
-    
+
     scheduler = CosineAnnealingLR(optimizer, T_max=cycle_lens[0] * len(train_loader) // (grad_acc_steps + 1), eta_min=min_lr)
     setattr(optimizer, 'max_lr', max_lr)  # store it inside the optimizer for accessing to it later
     setattr(scheduler, 'cycle_lens', cycle_lens)
 
     criterion = torch.nn.CrossEntropyLoss(ignore_index=0)
+    print('using novograd')
     tv_criterion = TvLoss(reduction='mean', alpha=args.alpha_tv)
 
     print('* Instantiating loss function', str(criterion), str(tv_criterion))

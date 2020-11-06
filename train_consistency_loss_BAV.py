@@ -90,9 +90,9 @@ def run_one_epoch(loader, model, criterion, tv_criterion, optimizer=None, schedu
             loss_aux = criterion(logits_aux, labels.squeeze(dim=1))
             loss_ce = loss_aux + criterion(logits, labels.squeeze(dim=1))
 
-            # tv_loss_aux = tv_criterion(logits_aux, labels)
-            # tv_loss = tv_criterion.alpha *(tv_loss_aux + tv_criterion(logits, labels))
-            tv_loss = tv_criterion.alpha * tv_criterion(logits, labels)
+            tv_loss_aux = tv_criterion(logits_aux, labels)
+            tv_loss = tv_criterion.alpha *(tv_loss_aux + tv_criterion(logits, labels))
+            # tv_loss = tv_criterion.alpha * tv_criterion(logits, labels)
 
             # loss = loss_ce
             loss = loss_ce + tv_loss

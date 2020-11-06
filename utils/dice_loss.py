@@ -201,6 +201,11 @@ class TvLoss(torch.nn.Module):
         #     foreground = torch.cat([labels!=0, labels!=0, labels!=0, labels!=0], dim=1).long()
         #     probs_filtered = torch.mul(probs, foreground) # discard values outside vessels
 
+        other_probs = torch.ones_like(probs)
+        other_probs[labels_oh==1]=1
+        probs = other_probs
+
+
         tv_l = torch.abs(torch.sub(probs, torch.roll(probs, shifts=1, dims=-1)))
         tv_r = torch.abs(torch.sub(probs, torch.roll(probs, shifts=-1, dims=-1)))
 

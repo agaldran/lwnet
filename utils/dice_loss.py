@@ -201,11 +201,10 @@ class TvLoss(torch.nn.Module):
         #     foreground = torch.cat([labels!=0, labels!=0, labels!=0, labels!=0], dim=1).long()
         #     probs_filtered = torch.mul(probs, foreground) # discard values outside vessels
 
-        other_probs = torch.ones_like(probs)
-        other_probs[labels_oh==0]=1
-        other_probs[labels_oh==1]=probs[labels_oh==1]
-        probs = other_probs
-
+        # other_probs = torch.ones_like(probs)
+        # other_probs[labels_oh==0]=1
+        # other_probs[labels_oh==1]=probs[labels_oh==1]
+        # probs = other_probs
 
         tv_l = torch.abs(torch.sub(probs, torch.roll(probs, shifts=1, dims=-1)))
         tv_r = torch.abs(torch.sub(probs, torch.roll(probs, shifts=-1, dims=-1)))
@@ -224,10 +223,10 @@ class TvLoss(torch.nn.Module):
 
         tv = self.compute_tv(logits, labels)
 
-        # perfect_tv = self.compute_tv(100 * labels_oh, labels) > 0
-        # tv[perfect_tv] = 0
+        perfect_tv = self.compute_tv(100 * labels_oh, labels) > 0
+        tv[perfect_tv] = 0
 
-        tv = torch.div(tv, probs + self.eps)
+        tv = torch.div(tv, torch.clamp(probs + self.eps, min=0, max=1))
 
         mean_per_elem_per_class = (tv.sum(dim=(-2, -1)) / (labels_oh.sum(dim=(-2, -1)) + self.eps))
         mean_per_class = mean_per_elem_per_class.mean(dim=0)

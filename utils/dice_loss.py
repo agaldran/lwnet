@@ -196,11 +196,11 @@ class TvLoss(torch.nn.Module):
         probs = torch.nn.Softmax(dim=1)(logits)
 
         labels_oh = torch.cat([labels == 0, labels == 1, labels == 2, labels == 3], dim=1).long()
-        # probs = torch.mul(probs, labels_oh)  # discard values outside labels
-        # probs[labels_oh!=1]=1  # set values outside labels to 1 to reduce gradient noise
+        probs = torch.mul(probs, labels_oh)  # discard values outside labels
+        probs[labels_oh!=1]=1  # set values outside labels to 1 to reduce gradient noise
 
-        foreground = torch.cat([labels!=0, labels!=0, labels!=0, labels!=0], dim=1).long()
-        probs = torch.mul(probs, foreground) # discard values outside vessels
+        # foreground = torch.cat([labels!=0, labels!=0, labels!=0, labels!=0], dim=1).long()
+        # probs = torch.mul(probs, foreground) # discard values outside vessels
 
         tv_l = torch.abs(torch.sub(probs, torch.roll(probs, shifts=1, dims=-1)))
         tv_r = torch.abs(torch.sub(probs, torch.roll(probs, shifts=-1, dims=-1)))

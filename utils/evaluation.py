@@ -46,6 +46,32 @@ def ewma(data, window=5):
 from sklearn.metrics import f1_score
 from sklearn.metrics import matthews_corrcoef as mcc
 
+def evaluate4(logits, labels):
+    all_targets = []
+    all_probs_0 = []
+    all_probs_1 = []
+    all_probs_2 = []
+    all_probs_3 = []
+
+    for i in range(len(logits)):
+        probs = torch.nn.Softmax(dim=0)(logits[i]).detach().cpu().numpy()
+        all_probs_0.extend(probs[0].ravel())
+        all_probs_1.extend(probs[1].ravel())
+        all_probs_2.extend(probs[2].ravel())
+        all_probs_3.extend(probs[3].ravel())
+
+        target = labels[i].numpy()
+
+        all_targets.append(target.ravel())
+
+    all_probs_np = np.stack([all_probs_0, all_probs_1, all_probs_2, all_probs_3], axis=1)
+    all_preds_np = np.argmax(all_probs_np, axis=1)
+
+    all_targets_np = np.hstack(all_targets)
+
+    return roc_auc_score(all_targets_np, all_probs_np, multi_class='ovo',average='weighted'),\
+           f1_score(all_targets_np, all_preds_np, average='weighted'), \
+           mcc(all_targets_np, all_preds_np)
 
 def evaluate(logits, labels):
     all_targets = []

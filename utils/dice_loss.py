@@ -202,7 +202,8 @@ class TvLoss(torch.nn.Module):
         #     probs_filtered = torch.mul(probs, foreground) # discard values outside vessels
 
         other_probs = torch.ones_like(probs)
-        other_probs[labels_oh==1]=1
+        other_probs[labels_oh==0]=1
+        other_probs[labels_oh==0]=probs[labels_oh==0]
         probs = other_probs
 
 

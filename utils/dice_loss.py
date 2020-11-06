@@ -216,7 +216,7 @@ class TvLoss(torch.nn.Module):
         tv_rd = torch.abs(torch.sub(probs, torch.roll(probs, shifts=(-1, -1), dims=(2, 3))))
         tv_ru = torch.abs(torch.sub(probs, torch.roll(probs, shifts=(1, -1), dims=(2, 3))))
         tv_dl = torch.abs(torch.sub(probs, torch.roll(probs, shifts=(-1, 1), dims=(2, 3))))
-        tv = torch.max(torch.stack([tv_l, tv_r, tv_u, tv_d, tv_lu, tv_rd, tv_ru, tv_dl], dim=0), dim=0)
+        tv,_ = torch.max(torch.stack([tv_l, tv_r, tv_u, tv_d, tv_lu, tv_rd, tv_ru, tv_dl], dim=0), dim=0)
 
 
         return tv

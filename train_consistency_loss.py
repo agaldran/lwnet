@@ -96,7 +96,7 @@ def run_one_epoch(loader, model, criterion, tv_criterion, optimizer=None, schedu
             loss_ce = loss_aux + criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
 
             tv_loss_aux = tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels)
-            tv_loss = tv_loss_aux + tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels)
+            tv_loss = tv_loss_aux# + tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels)
             # loss = loss_ce
             loss = loss_ce + tv_criterion.alpha * tv_loss
 
@@ -124,7 +124,7 @@ def run_one_epoch(loader, model, criterion, tv_criterion, optimizer=None, schedu
         # Compute running loss
         running_loss += loss.item() * inputs.size(0)
         running_loss_ce += loss_ce.item() * inputs.size(0)
-        running_loss_tv += 10*tv_loss.item() * inputs.size(0)
+        running_loss_tv += tv_loss.item() * inputs.size(0)
         n_elems += inputs.size(0)
         run_loss_ce = running_loss_ce / n_elems
         run_loss_tv = running_loss_tv / n_elems

@@ -208,12 +208,16 @@ class TvLoss(torch.nn.Module):
 
         tv_l = torch.abs(torch.sub(probs, torch.roll(probs, shifts=1, dims=-1)))
         tv_r = torch.abs(torch.sub(probs, torch.roll(probs, shifts=-1, dims=-1)))
-
         tv_u = torch.abs(torch.sub(probs, torch.roll(probs, shifts=-1, dims=-2)))
         tv_d = torch.abs(torch.sub(probs, torch.roll(probs, shifts=1, dims=-2)))
-        #     tv_d = torch.clamp(tv_d, min=0, max=1)
+        # tv = torch.mean(torch.stack([tv_l, tv_r, tv_u, tv_d], axis=0), dim=0)
 
-        tv = torch.mean(torch.stack([tv_l, tv_r, tv_u, tv_d], axis=0), dim=0)
+        tv_lu = torch.abs(torch.sub(probs, torch.roll(probs, shifts=(1, 1), dims=(2, 3))))
+        tv_rd = torch.abs(torch.sub(probs, torch.roll(probs, shifts=(-1, -1), dims=(2, 3))))
+        tv_ru = torch.abs(torch.sub(probs, torch.roll(probs, shifts=(1, -1), dims=(2, 3))))
+        tv_dl = torch.abs(torch.sub(probs, torch.roll(probs, shifts=(-1, 1), dims=(2, 3))))
+        tv = torch.mean(torch.stack([tv_l, tv_r, tv_u, tv_d, tv_lu, tv_rd, tv_ru, tv_dl], dim=0), dim=0)
+        
 
         return tv
 

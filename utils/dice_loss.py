@@ -224,8 +224,8 @@ class TvLoss(torch.nn.Module):
 
         tv = self.compute_tv(logits, labels)
 
-        perfect_tv = self.compute_tv(100 * labels_oh, labels) > 0
-        tv[perfect_tv] = 0
+        # perfect_tv = self.compute_tv(100 * labels_oh, labels) > 0
+        # tv[perfect_tv] = 0
 
         tv = torch.div(tv, probs + self.eps)
 

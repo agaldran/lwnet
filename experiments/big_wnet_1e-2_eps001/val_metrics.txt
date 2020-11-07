@@ -1,0 +1,86 @@
+Best AUC = 92.26
+Best DICE = 91.50
+Best MCC = 83.44
+Best cycle = 40
+
+Epoch = 0 -> AUC = 73.13, Dice = 70.53, MCC = 43.59
+
+Epoch = 1 -> AUC = 78.62, Dice = 75.82, MCC = 54.04
+
+Epoch = 2 -> AUC = 80.01, Dice = 77.58, MCC = 57.10
+
+Epoch = 3 -> AUC = 83.60, Dice = 81.65, MCC = 64.85
+
+Epoch = 4 -> AUC = 85.68, Dice = 84.16, MCC = 69.43
+
+Epoch = 5 -> AUC = 86.69, Dice = 85.44, MCC = 71.71
+
+Epoch = 6 -> AUC = 87.55, Dice = 86.48, MCC = 73.73
+
+Epoch = 7 -> AUC = 86.78, Dice = 85.83, MCC = 72.37
+
+Epoch = 8 -> AUC = 88.21, Dice = 87.06, MCC = 74.84
+
+Epoch = 9 -> AUC = 88.20, Dice = 87.15, MCC = 75.04
+
+Epoch = 10 -> AUC = 88.23, Dice = 87.18, MCC = 75.10
+
+Epoch = 11 -> AUC = 89.01, Dice = 87.89, MCC = 76.53
+
+Epoch = 12 -> AUC = 88.60, Dice = 87.65, MCC = 76.00
+
+Epoch = 13 -> AUC = 89.18, Dice = 88.22, MCC = 77.14
+
+Epoch = 14 -> AUC = 88.95, Dice = 88.03, MCC = 76.71
+
+Epoch = 15 -> AUC = 89.95, Dice = 88.95, MCC = 78.59
+
+Epoch = 16 -> AUC = 89.38, Dice = 88.56, MCC = 77.75
+
+Epoch = 17 -> AUC = 90.10, Dice = 89.24, MCC = 79.10
+
+Epoch = 18 -> AUC = 90.29, Dice = 89.36, MCC = 79.35
+
+Epoch = 19 -> AUC = 90.31, Dice = 89.37, MCC = 79.42
+
+Epoch = 20 -> AUC = 89.93, Dice = 88.94, MCC = 78.59
+
+Epoch = 21 -> AUC = 90.26, Dice = 89.36, MCC = 79.36
+
+Epoch = 22 -> AUC = 90.14, Dice = 89.22, MCC = 79.15
+
+Epoch = 23 -> AUC = 89.84, Dice = 89.07, MCC = 78.72
+
+Epoch = 24 -> AUC = 90.78, Dice = 89.81, MCC = 80.28
+
+Epoch = 25 -> AUC = 90.55, Dice = 89.52, MCC = 79.72
+
+Epoch = 26 -> AUC = 90.81, Dice = 89.79, MCC = 80.20
+
+Epoch = 27 -> AUC = 91.11, Dice = 90.14, MCC = 80.91
+
+Epoch = 28 -> AUC = 89.93, Dice = 89.04, MCC = 78.74
+
+Epoch = 29 -> AUC = 90.93, Dice = 89.98, MCC = 80.56
+
+Epoch = 30 -> AUC = 90.95, Dice = 89.99, MCC = 80.60
+
+Epoch = 31 -> AUC = 91.14, Dice = 90.28, MCC = 81.15
+
+Epoch = 32 -> AUC = 91.01, Dice = 90.04, MCC = 80.72
+
+Epoch = 33 -> AUC = 91.61, Dice = 90.62, MCC = 81.86
+
+Epoch = 34 -> AUC = 91.34, Dice = 90.29, MCC = 81.24
+
+Epoch = 35 -> AUC = 90.62, Dice = 89.75, MCC = 80.08
+
+Epoch = 36 -> AUC = 91.64, Dice = 90.73, MCC = 81.99
+
+Epoch = 37 -> AUC = 91.79, Dice = 90.91, MCC = 82.36
+
+Epoch = 38 -> AUC = 91.90, Dice = 90.95, MCC = 82.42
+
+Epoch = 39 -> AUC = 92.26, Dice = 91.50, MCC = 83.44
+
+Training time: 01h 02min 08.61secs

@@ -231,8 +231,9 @@ class TvLoss(torch.nn.Module):
             return tv
 
 class SimilarityLoss(torch.nn.Module):
-    def __init__(self, with_probs=True, reduction='mean'):
+    def __init__(self, with_probs=True, alpha=0.01, reduction='mean'):
         super(SimilarityLoss, self).__init__()
+        self.alpha = alpha
         self.with_probs = with_probs
         self.reduction = reduction
 

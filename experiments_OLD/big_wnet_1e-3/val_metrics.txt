@@ -1,0 +1,66 @@
+Best AUC = 91.30
+Best DICE = 90.24
+Best MCC = 81.04
+Best cycle = 26
+
+Epoch = 0 -> AUC = 72.95, Dice = 70.42, MCC = 43.29
+
+Epoch = 1 -> AUC = 78.00, Dice = 75.48, MCC = 53.07
+
+Epoch = 2 -> AUC = 81.02, Dice = 78.55, MCC = 59.06
+
+Epoch = 3 -> AUC = 83.40, Dice = 81.74, MCC = 64.77
+
+Epoch = 4 -> AUC = 85.17, Dice = 83.68, MCC = 68.45
+
+Epoch = 5 -> AUC = 86.81, Dice = 85.54, MCC = 71.99
+
+Epoch = 6 -> AUC = 87.76, Dice = 86.42, MCC = 73.67
+
+Epoch = 7 -> AUC = 86.63, Dice = 85.74, MCC = 72.19
+
+Epoch = 8 -> AUC = 88.35, Dice = 87.38, MCC = 75.43
+
+Epoch = 9 -> AUC = 89.07, Dice = 88.11, MCC = 76.88
+
+Epoch = 10 -> AUC = 87.80, Dice = 86.91, MCC = 74.46
+
+Epoch = 11 -> AUC = 89.79, Dice = 88.63, MCC = 77.96
+
+Epoch = 12 -> AUC = 88.89, Dice = 87.95, MCC = 76.55
+
+Epoch = 13 -> AUC = 88.95, Dice = 87.95, MCC = 76.53
+
+Epoch = 14 -> AUC = 89.18, Dice = 88.27, MCC = 77.13
+
+Epoch = 15 -> AUC = 89.23, Dice = 88.32, MCC = 77.26
+
+Epoch = 16 -> AUC = 89.13, Dice = 88.17, MCC = 76.95
+
+Epoch = 17 -> AUC = 89.79, Dice = 88.95, MCC = 78.45
+
+Epoch = 18 -> AUC = 90.35, Dice = 89.33, MCC = 79.24
+
+Epoch = 19 -> AUC = 89.99, Dice = 89.04, MCC = 78.65
+
+Epoch = 20 -> AUC = 89.39, Dice = 88.42, MCC = 77.46
+
+Epoch = 21 -> AUC = 89.72, Dice = 88.83, MCC = 78.24
+
+Epoch = 22 -> AUC = 89.70, Dice = 88.76, MCC = 78.12
+
+Epoch = 23 -> AUC = 89.39, Dice = 88.53, MCC = 77.64
+
+Epoch = 24 -> AUC = 90.27, Dice = 89.37, MCC = 79.29
+
+Epoch = 25 -> AUC = 91.30, Dice = 90.24, MCC = 81.04
+
+Epoch = 26 -> AUC = 90.81, Dice = 89.86, MCC = 80.28
+
+Epoch = 27 -> AUC = 90.71, Dice = 89.92, MCC = 80.34
+
+Epoch = 28 -> AUC = 90.88, Dice = 89.96, MCC = 80.47
+
+Epoch = 29 -> AUC = 90.78, Dice = 90.00, MCC = 80.50
+
+Training time: 00h 46min 30.33secs

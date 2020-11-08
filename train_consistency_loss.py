@@ -306,7 +306,7 @@ if __name__ == '__main__':
     criterion = torch.nn.CrossEntropyLoss(ignore_index=0)
 
     tv_criterion = TvLoss(reduction='mean', alpha=args.alpha_tv, eps = args.eps_tv)
-
+    tv_criterion = SimilarityLoss(reduction='mean', alpha=args.alpha_tv)
     print('* Instantiating loss function', str(criterion), str(tv_criterion))
     print('* Starting to train\n','-' * 10)
 

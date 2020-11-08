@@ -30,30 +30,47 @@ python train_consistency_loss_BAV.py --alpha_tv 0.001  --model_name big_wnet --s
 
 
 
-python train_consistency_loss.py --alpha_tv 1.0    --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_1e-0_eps01
-python train_consistency_loss.py --alpha_tv 0.1    --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_1e-1_eps01
-python train_consistency_loss.py --alpha_tv 0.05   --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_5e-2_eps01
-python train_consistency_loss.py --alpha_tv 0.01   --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_1e-2_eps01
-python train_consistency_loss.py --alpha_tv 0.005  --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_5e-3_eps01
-python train_consistency_loss.py --alpha_tv 0.001  --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_1e-3_eps01
+python train_consistency_loss.py --alpha_tv 1.0    --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_1e-0_eps01 && 
+python train_consistency_loss.py --alpha_tv 0.1    --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_1e-1_eps01 && 
+python train_consistency_loss.py --alpha_tv 0.05   --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_5e-2_eps01 && 
+python train_consistency_loss.py --alpha_tv 0.01   --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_1e-2_eps01 && 
+python train_consistency_loss.py --alpha_tv 0.005  --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_5e-3_eps01 && 
+python train_consistency_loss.py --alpha_tv 0.001  --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_1e-3_eps01 && 
 
-python train_consistency_loss.py --alpha_tv 1.0    --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_1e-0_eps001
-python train_consistency_loss.py --alpha_tv 0.1    --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_1e-1_eps001
-python train_consistency_loss.py --alpha_tv 0.05   --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_5e-2_eps001
-python train_consistency_loss.py --alpha_tv 0.01   --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_1e-2_eps001
-python train_consistency_loss.py --alpha_tv 0.005  --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_5e-3_eps001
-python train_consistency_loss.py --alpha_tv 0.001  --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_1e-3_eps001
+python train_consistency_loss.py --alpha_tv 1.0    --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_1e-0_eps001 && 
+python train_consistency_loss.py --alpha_tv 0.1    --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_1e-1_eps001 && 
+python train_consistency_loss.py --alpha_tv 0.05   --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_5e-2_eps001 && 
+python train_consistency_loss.py --alpha_tv 0.01   --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_1e-2_eps001 && 
+python train_consistency_loss.py --alpha_tv 0.005  --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_5e-3_eps001 && 
+python train_consistency_loss.py --alpha_tv 0.001  --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_1e-3_eps001 && 
 
-python train_consistency_loss_BAV.py --alpha_tv 1.0    --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_BAV_1e-0_eps01
-python train_consistency_loss_BAV.py --alpha_tv 0.1    --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_BAV_1e-1_eps01
-python train_consistency_loss_BAV.py --alpha_tv 0.05   --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_BAV_5e-2_eps01
-python train_consistency_loss_BAV.py --alpha_tv 0.01   --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_BAV_1e-2_eps01
-python train_consistency_loss_BAV.py --alpha_tv 0.005  --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_BAV_5e-3_eps01
-python train_consistency_loss_BAV.py --alpha_tv 0.001  --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_BAV_1e-3_eps01
 
-python train_consistency_loss_BAV.py --alpha_tv 1.0    --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_BAV_1e-0_eps001
-python train_consistency_loss_BAV.py --alpha_tv 0.1    --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_BAV_1e-1_eps001
-python train_consistency_loss_BAV.py --alpha_tv 0.05   --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_BAV_5e-2_eps001
-python train_consistency_loss_BAV.py --alpha_tv 0.01   --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_BAV_1e-2_eps001
-python train_consistency_loss_BAV.py --alpha_tv 0.005  --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_BAV_5e-3_eps001
-python train_consistency_loss_BAV.py --alpha_tv 0.001  --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_BAV_1e-3_eps001
+python train_consistency_loss.py --alpha_tv 1.0   --model_name big_wnet --save_path big_wnet_1e-0_sim && 
+python train_consistency_loss.py --alpha_tv 0.1   --model_name big_wnet --save_path big_wnet_1e-1_sim && 
+python train_consistency_loss.py --alpha_tv 0.05  --model_name big_wnet --save_path big_wnet_5e-2_sim && 
+python train_consistency_loss.py --alpha_tv 0.01  --model_name big_wnet --save_path big_wnet_1e-2_sim && 
+python train_consistency_loss.py --alpha_tv 0.005 --model_name big_wnet --save_path big_wnet_5e-3_sim && 
+python train_consistency_loss.py --alpha_tv 0.001 --model_name big_wnet --save_path big_wnet_1e-3_sim && 
+
+python train_consistency_loss.py --alpha_tv 1.0    --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_1e-0_eps001 && 
+python train_consistency_loss.py --alpha_tv 0.1    --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_1e-1_eps001 && 
+python train_consistency_loss.py --alpha_tv 0.05   --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_5e-2_eps001 && 
+python train_consistency_loss.py --alpha_tv 0.01   --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_1e-2_eps001 && 
+python train_consistency_loss.py --alpha_tv 0.005  --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_5e-3_eps001 && 
+python train_consistency_loss.py --alpha_tv 0.001  --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_1e-3_eps001 && 
+
+python train_consistency_loss_BAV.py --alpha_tv 1.0    --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_BAV_1e-0_eps01 && 
+python train_consistency_loss_BAV.py --alpha_tv 0.1    --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_BAV_1e-1_eps01 && 
+python train_consistency_loss_BAV.py --alpha_tv 0.05   --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_BAV_5e-2_eps01 && 
+python train_consistency_loss_BAV.py --alpha_tv 0.01   --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_BAV_1e-2_eps01 && 
+python train_consistency_loss_BAV.py --alpha_tv 0.005  --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_BAV_5e-3_eps01 && 
+python train_consistency_loss_BAV.py --alpha_tv 0.001  --eps_tv 0.1 --model_name big_wnet --save_path big_wnet_BAV_1e-3_eps01 && 
+
+python train_consistency_loss_BAV.py --alpha_tv 1.0    --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_BAV_1e-0_eps001 && 
+python train_consistency_loss_BAV.py --alpha_tv 0.1    --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_BAV_1e-1_eps001 && 
+python train_consistency_loss_BAV.py --alpha_tv 0.05   --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_BAV_5e-2_eps001 && 
+python train_consistency_loss_BAV.py --alpha_tv 0.01   --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_BAV_1e-2_eps001 && 
+python train_consistency_loss_BAV.py --alpha_tv 0.005  --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_BAV_5e-3_eps001 && 
+python train_consistency_loss_BAV.py --alpha_tv 0.001  --eps_tv 0.01 --model_name big_wnet --save_path big_wnet_BAV_1e-3_eps001 && 
+
+

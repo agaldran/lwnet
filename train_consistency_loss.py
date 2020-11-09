@@ -328,8 +328,7 @@ if __name__ == '__main__':
     print("Total params: {0:,}".format(sum(p.numel() for p in model.parameters() if p.requires_grad)))
     optimizer = torch.optim.Adam(model.parameters(), lr=max_lr)
     # optimizer = torch.optim.SGD(model.parameters(), lr=max_lr)
-    # from monai.optimizers import Novograd
-    # optimizer = Novograd(model.parameters(), lr=max_lr)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=max_lr, weight_decay=0.1)
 
     scheduler = CosineAnnealingLR(optimizer, T_max=cycle_lens[0] * len(train_loader) // (grad_acc_steps + 1), eta_min=min_lr)
     setattr(optimizer, 'max_lr', max_lr)  # store it inside the optimizer for accessing to it later

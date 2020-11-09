@@ -86,39 +86,47 @@ def run_one_epoch(loader, model, criterion, tv_criterion, optimizer=None, schedu
 
         if isinstance(logits, tuple): # wnet
             logits_aux, logits = logits
-            # CrossEntropyLoss() -> A/V segmentation
-            if model.compose=='mul':
-                labels_aux = labels != 0
-                loss_aux = torch.nn.BCEWithLogitsLoss()(logits_aux.squeeze(), labels_aux.float())
-            elif model.compose=='cat':
-                loss_aux = criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
-                # loss_aux = criterion(logits_aux, labels)
 
+            loss_aux = criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
+            # loss_aux = criterion(logits_aux, labels)
             loss_ce = loss_aux + criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
 
-            tv_loss_aux =  tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels)
-            tv_loss = tv_criterion.alpha * (tv_loss_aux+tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels))
-            # tv_loss = tv_criterion.alpha * (tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels))
+            logits = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits)
+            logits_aux = torch.nn.UpsamplingNearest2d(scale_factor=1 / 2)(logits_aux)
+            labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
+            loss_ce += criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
+            loss_ce += criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
 
-            logits = torch.nn.UpsamplingBilinear2d(scale_factor=1/2)(logits)
-            logits_aux = torch.nn.UpsamplingBilinear2d(scale_factor=1 / 2)(logits_aux)
+            logits = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits)
+            logits_aux = torch.nn.UpsamplingNearest2d(scale_factor=1 / 2)(logits_aux)
             labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
-            tv_loss_aux += tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels)
-            tv_loss += tv_loss_aux
-            tv_loss += tv_criterion.alpha * (tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels))
-            
-            logits = torch.nn.UpsamplingBilinear2d(scale_factor=1/2)(logits)
-            logits_aux = torch.nn.UpsamplingBilinear2d(scale_factor=1 / 2)(logits_aux)
-            labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
-            tv_loss_aux += tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels)
-            tv_loss += tv_loss_aux
-            tv_loss += tv_criterion.alpha * (tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels))
+            loss_ce += criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
+            loss_ce += criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
+
+
+            # tv_loss_aux =  tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels)
+            # tv_loss = tv_criterion.alpha * (tv_loss_aux+tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels))
+            # # tv_loss = tv_criterion.alpha * (tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels))
+            #
+            # logits = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits)
+            # logits_aux = torch.nn.UpsamplingNearest2d(scale_factor=1 / 2)(logits_aux)
+            # labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
+            # tv_loss_aux += tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels)
+            # tv_loss += tv_loss_aux
+            # tv_loss += tv_criterion.alpha * (tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels))
+            #
+            # logits = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits)
+            # logits_aux = torch.nn.UpsamplingNearest2d(scale_factor=1 / 2)(logits_aux)
+            # labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
+            # tv_loss_aux += tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels)
+            # tv_loss += tv_loss_aux
+            # tv_loss += tv_criterion.alpha * (tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels))
 
             # loss += criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
             # loss += tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels)
 
-            # loss = loss_ce
-            loss = loss_ce + tv_loss
+            loss, tv_loss = loss_ce, torch.tensor(0)
+            # loss = loss_ce + tv_loss
 
 
         else: # not wnet

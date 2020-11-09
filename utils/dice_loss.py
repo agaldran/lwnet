@@ -186,7 +186,7 @@ class TvLoss(torch.nn.Module):
 
 class TvLoss(torch.nn.Module):
     # def __init__(self, alpha=0.01, eps=1e-6, reduction='mean'):
-    def __init__(self, alpha=0.01, eps=1e-1, reduction='mean'):
+    def __init__(self, alpha=0.01, eps=1e-6, reduction='mean'):
         super(TvLoss, self).__init__()
         self.reduction = reduction
         self.alpha = alpha

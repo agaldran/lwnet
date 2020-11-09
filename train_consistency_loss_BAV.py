@@ -95,6 +95,10 @@ def run_one_epoch(loader, model, criterion, tv_criterion, optimizer=None, schedu
             tv_loss = tv_criterion.alpha *(tv_loss_aux + tv_criterion(logits, labels))
             # tv_loss = tv_criterion.alpha * tv_criterion(logits, labels)
 
+            logits = torch.nn.UpsamplingBilinear2d(scale_factor=1/2)(logits)
+            labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
+            loss += criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
+
             # loss = loss_ce
             loss = loss_ce + tv_loss
 

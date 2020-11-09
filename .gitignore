@@ -9,8 +9,7 @@ __pycache__
 *.swp
 *.pyc
 
-data
-MONAI_BOOTCAMP
+
 # Ignore result directories
 # experiments/
 results/

@@ -99,12 +99,12 @@ def run_one_epoch(loader, model, criterion, tv_criterion, optimizer=None, schedu
             # logits_aux = torch.nn.MaxPool2d(kernel_size=2, stride=2)(logits_aux)
 
             # logits = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits)
-            logits = torch.nn.functional.interpolate(logits, scale_factor=1/2)
+            logits = torch.nn.functional.interpolate(logits, scale_factor=1/2, recompute_scale_factor=False)
             # logits_aux = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits_aux)
-            logits_aux = torch.nn.functional.interpolate(logits_aux, scale_factor=1/2)
+            logits_aux = torch.nn.functional.interpolate(logits_aux, scale_factor=1/2, recompute_scale_factor=False)
 
             # labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
-            labels = torch.nn.functional.interpolate(labels.float(), scale_factor=1/2).long()
+            labels = torch.nn.functional.interpolate(labels.float(), scale_factor=1/2, recompute_scale_factor=False).long()
 
             loss_ce += 0.5*criterion2(logits_aux, labels.squeeze(dim=1))
             loss_ce += 0.5*criterion2(logits, labels.squeeze(dim=1))
@@ -112,12 +112,12 @@ def run_one_epoch(loader, model, criterion, tv_criterion, optimizer=None, schedu
             # logits = torch.nn.MaxPool2d(kernel_size=2, stride=2)(logits)
             # logits_aux = torch.nn.MaxPool2d(kernel_size=2, stride=2)(logits_aux)
             # logits = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits)
-            logits = torch.nn.functional.interpolate(logits, scale_factor=1/2)
+            logits = torch.nn.functional.interpolate(logits, scale_factor=1/2, recompute_scale_factor=False)
             # logits_aux = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits_aux)
-            logits_aux = torch.nn.functional.interpolate(logits_aux, scale_factor=1/2)
+            logits_aux = torch.nn.functional.interpolate(logits_aux, scale_factor=1/2, recompute_scale_factor=False)
 
             # labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
-            labels = torch.nn.functional.interpolate(labels.float(), scale_factor=1/2).long()
+            labels = torch.nn.functional.interpolate(labels.float(), scale_factor=1/2, recompute_scale_factor=False).long()
 
             loss_ce += 0.25*criterion2(logits_aux, labels.squeeze(dim=1))
             loss_ce += 0.25*criterion2(logits, labels.squeeze(dim=1))

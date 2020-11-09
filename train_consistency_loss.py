@@ -326,7 +326,7 @@ if __name__ == '__main__':
     model = model.to(device)
 
     print("Total params: {0:,}".format(sum(p.numel() for p in model.parameters() if p.requires_grad)))
-    optimizer = torch.optim.Adam(model.parameters(), lr=max_lr)
+    # optimizer = torch.optim.Adam(model.parameters(), lr=max_lr)
     # optimizer = torch.optim.SGD(model.parameters(), lr=max_lr)
     optimizer = torch.optim.AdamW(model.parameters(), lr=max_lr, weight_decay=0.1)
 

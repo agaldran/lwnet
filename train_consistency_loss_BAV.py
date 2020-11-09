@@ -97,19 +97,30 @@ def run_one_epoch(loader, model, criterion, tv_criterion, optimizer=None, schedu
             criterion2 = torch.nn.CrossEntropyLoss(ignore_index=0)
             # logits = torch.nn.MaxPool2d(kernel_size=2, stride=2)(logits)
             # logits_aux = torch.nn.MaxPool2d(kernel_size=2, stride=2)(logits_aux)
-            logits = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits)
-            logits_aux = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits_aux)
-            labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
-            loss_ce += 0.5*criterion2(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
-            loss_ce += 0.5*criterion2(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
+
+            # logits = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits)
+            logits = torch.nn.functional.interpolate(logits, scale_factor=1/2)
+            # logits_aux = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits_aux)
+            logits_aux = torch.nn.functional.interpolate(logits_aux, scale_factor=1/2)
+
+            # labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
+            labels = torch.nn.functional.interpolate(labels.float(), scale_factor=1/2).long()
+
+            loss_ce += 0.5*criterion2(logits_aux, labels.squeeze(dim=1))
+            loss_ce += 0.5*criterion2(logits, labels.squeeze(dim=1))
 
             # logits = torch.nn.MaxPool2d(kernel_size=2, stride=2)(logits)
             # logits_aux = torch.nn.MaxPool2d(kernel_size=2, stride=2)(logits_aux)
-            logits = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits)
-            logits_aux = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits_aux)
-            labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
-            loss_ce += 0.25*criterion2(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
-            loss_ce += 0.25*criterion2(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
+            # logits = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits)
+            logits = torch.nn.functional.interpolate(logits, scale_factor=1/2)
+            # logits_aux = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits_aux)
+            logits_aux = torch.nn.functional.interpolate(logits_aux, scale_factor=1/2)
+
+            # labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
+            labels = torch.nn.functional.interpolate(labels.float(), scale_factor=1/2).long()
+
+            loss_ce += 0.25*criterion2(logits_aux, labels.squeeze(dim=1))
+            loss_ce += 0.25*criterion2(logits, labels.squeeze(dim=1))
 
 
             loss, tv_loss = loss_ce, torch.tensor(0)

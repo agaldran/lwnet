@@ -107,7 +107,7 @@ def run_one_epoch(loader, model, criterion, tv_criterion, optimizer=None, schedu
             labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
 
             loss += criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
-            loss += tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels)
+            # loss += tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels)
             
         else: # not wnet
             sys.exit('code needs to be adapted to train models other than Wnet here')

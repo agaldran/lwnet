@@ -14,15 +14,15 @@ from utils.model_saving_loading import save_model, str2bool, load_model
 from utils.reproducibility import set_seeds
 
 from torch.optim.lr_scheduler import CosineAnnealingLR
-from utils.dice_loss import DiceLoss, TvLoss, SimilarityLoss
+
 # argument parsing
 parser = argparse.ArgumentParser()
 # as seen here: https://stackoverflow.com/a/15460288/3208255
 # parser.add_argument('--layers',  nargs='+', type=int, help='unet configuration (depth/filters)')
 # annoyingly, this does not get on well with guild.ai, so we need to reverse to this one:
 
-parser.add_argument('--csv_train', type=str, default='data/DRIVE/train_av.csv', help='path to training data csv')
-parser.add_argument('--model_name', type=str, default='big_wnet', help='architecture')
+parser.add_argument('--csv_train', type=str, default='data/DRIVE/train.csv', help='path to training data csv')
+parser.add_argument('--model_name', type=str, default='wnet', help='architecture')
 parser.add_argument('--batch_size', type=int, default=4, help='batch Size')
 parser.add_argument('--grad_acc_steps', type=int, default=0, help='gradient accumulation steps (0)')
 parser.add_argument('--min_lr', type=float, default=1e-8, help='learning rate')
@@ -75,8 +75,7 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
         grad_acc_steps=0, assess=False):
     device='cuda' if next(model.parameters()).is_cuda else 'cpu'
     train = optimizer is not None  # if we are in training mode there will be an optimizer and train=True here
-    tv_criterion = TvLoss()
-    sim_criterion = SimilarityLoss()
+
     if train:
         model.train()
     else:
@@ -92,13 +91,9 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
                 logits_aux, logits = logits
                 if model.n_classes == 1: # BCEWithLogitsLoss()/DiceLoss()
                     loss_aux = criterion(logits_aux, labels.unsqueeze(dim=1).float())
-                    # tv_loss_back = tv_criterion(-logits, 1 - labels)
-                    # tv_loss_fg = tv_criterion(logits, labels)
-                    loss = loss_aux + criterion(logits, labels.unsqueeze(dim=1).float())#+tv_loss_back#+tv_loss_fg
-
-                else: # CrossEntropyLoss() -> A/V segmentation
+                    loss = loss_aux + criterion(logits, labels.unsqueeze(dim=1).float())
+                else: # CrossEntropyLoss()
                     loss_aux = criterion(logits_aux, labels)
-                    #sim_loss_aux = sim_criterion(logits_aux, labels)
                     loss = loss_aux + criterion(logits, labels)
             else: # not wnet
                 if model.n_classes == 1:
@@ -138,7 +133,7 @@ def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=No
     optimizer.zero_grad()
     cycle_len = scheduler.cycle_lens[cycle]
     for epoch in range(cycle_len):
-        # print('Cycle {:d} | Epoch {:d}/{:d}'.format(cycle+1, epoch+1, cycle_len))
+        print('Cycle {:d} | Epoch {:d}/{:d}'.format(cycle+1, epoch+1, cycle_len))
         if epoch == cycle_len-1: assess=True # only get logits/labels on last cycle
         else: assess = False
         tr_logits, tr_labels, tr_loss = run_one_epoch(train_loader, model, criterion, optimizer=optimizer,

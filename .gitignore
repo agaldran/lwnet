@@ -3,20 +3,18 @@ __pycache__
 **.idea
 # Ignore notebook checkpoints
 **.ipynb_checkpoints
-.ipynb
+**.ipynb
 # Vim files and python caches
 *~
 *.swp
 *.pyc
 
-data_old
 data
-*.pth
-
+MONAI_BOOTCAMP
 # Ignore result directories
 # experiments/
 results/
-MONAI_BOOTCAMP
+
 instructions_vessels_training_testing
 manuscript_tmi
 manuscript_arxiv

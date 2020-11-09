@@ -21,8 +21,8 @@ parser = argparse.ArgumentParser()
 # parser.add_argument('--layers',  nargs='+', type=int, help='unet configuration (depth/filters)')
 # annoyingly, this does not get on well with guild.ai, so we need to reverse to this one:
 
-parser.add_argument('--csv_train', type=str, default='data/DRIVE/train.csv', help='path to training data csv')
-parser.add_argument('--model_name', type=str, default='wnet', help='architecture')
+parser.add_argument('--csv_train', type=str, default='data/DRIVE/train_av.csv', help='path to training data csv')
+parser.add_argument('--model_name', type=str, default='big_wnet', help='architecture')
 parser.add_argument('--batch_size', type=int, default=4, help='batch Size')
 parser.add_argument('--grad_acc_steps', type=int, default=0, help='gradient accumulation steps (0)')
 parser.add_argument('--min_lr', type=float, default=1e-8, help='learning rate')
@@ -32,9 +32,6 @@ parser.add_argument('--metric', type=str, default='auc', help='which metric to u
 parser.add_argument('--im_size', help='delimited list input, could be 600,400', type=str, default='512')
 parser.add_argument('--do_not_save', type=str2bool, nargs='?', const=True, default=False, help='avoid saving anything')
 parser.add_argument('--save_path', type=str, default='date_time', help='path to save model (defaults to date/time')
-# these three are for training with pseudo-segmentations
-# e.g. --csv_test data/DRIVE/test.csv --path_test_preds results/DRIVE/experiments/wnet_drive
-# e.g. --csv_test data/LES_AV/test_all.csv --path_test_preds results/LES_AV/experiments/wnet_drive
 parser.add_argument('--csv_test', type=str, default=None, help='path to test data csv (for using pseudo labels)')
 parser.add_argument('--path_test_preds', type=str, default=None, help='path to test predictions (for using pseudo labels)')
 parser.add_argument('--checkpoint_folder', type=str, default=None, help='path to model to start training (with pseudo labels now)')

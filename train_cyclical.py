@@ -21,8 +21,8 @@ parser = argparse.ArgumentParser()
 # parser.add_argument('--layers',  nargs='+', type=int, help='unet configuration (depth/filters)')
 # annoyingly, this does not get on well with guild.ai, so we need to reverse to this one:
 
-parser.add_argument('--csv_train', type=str, default='data/DRIVE/train.csv', help='path to training data csv')
-parser.add_argument('--model_name', type=str, default='wnet', help='architecture')
+parser.add_argument('--csv_train', type=str, default='data/DRIVE/train_av.csv', help='path to training data csv')
+parser.add_argument('--model_name', type=str, default='big_wnet', help='architecture')
 parser.add_argument('--batch_size', type=int, default=4, help='batch Size')
 parser.add_argument('--grad_acc_steps', type=int, default=0, help='gradient accumulation steps (0)')
 parser.add_argument('--min_lr', type=float, default=1e-8, help='learning rate')

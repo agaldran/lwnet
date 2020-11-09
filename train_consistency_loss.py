@@ -96,17 +96,19 @@ def run_one_epoch(loader, model, criterion, tv_criterion, optimizer=None, schedu
 
             loss_ce = loss_aux + criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
 
-            tv_loss_aux =  tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels)
-            tv_loss = tv_criterion.alpha * (tv_loss_aux+tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels))
+            # tv_loss_aux =  tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels)
+            # tv_loss = tv_criterion.alpha * (tv_loss_aux+tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels))
+
+            tv_loss = tv_criterion.alpha * (tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels))
             # loss = loss_ce
             loss = loss_ce + tv_loss
 
-            print(type(logits), logits.shape, type(labels), labels.shape)
-            logits = torch.nn.MaxPool2d(kernel_size=2)(logits)
-            labels = torch.nn.MaxPool2d(kernel_size=2)(labels)
-            print(type(logits), logits.shape, type(labels), labels.shape)
-            sys.exit()
+            logits = torch.nn.UpsamplingBilinear2d(scale_factor=1/2)(logits)
+            labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
 
+            loss += criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
+            loss += tv_criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels)
+            
         else: # not wnet
             sys.exit('code needs to be adapted to train models other than Wnet here')
 

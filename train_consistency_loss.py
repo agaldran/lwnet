@@ -101,6 +101,12 @@ def run_one_epoch(loader, model, criterion, tv_criterion, optimizer=None, schedu
             # loss = loss_ce
             loss = loss_ce + tv_loss
 
+            print(type(logits), logits.shape, type(labels), labels.shape)
+            logits = torch.nn.MaxPool2d(kernel_size=2)(logits)
+            labels = torch.nn.MaxPool2d(kernel_size=2)(labels)
+            print(type(logits), logits.shape, type(labels), labels.shape)
+            sys.exit()
+
         else: # not wnet
             sys.exit('code needs to be adapted to train models other than Wnet here')
 
@@ -306,7 +312,7 @@ if __name__ == '__main__':
     criterion = torch.nn.CrossEntropyLoss(ignore_index=0)
 
     tv_criterion = TvLoss(reduction='mean', alpha=args.alpha_tv, eps = args.eps_tv)
-    tv_criterion = SimilarityLoss(reduction='mean', alpha=args.alpha_tv)
+    # tv_criterion = SimilarityLoss(reduction='mean', alpha=args.alpha_tv)
     print('* Instantiating loss function', str(criterion), str(tv_criterion))
     print('* Starting to train\n','-' * 10)
 

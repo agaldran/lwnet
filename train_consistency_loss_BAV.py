@@ -91,16 +91,29 @@ def run_one_epoch(loader, model, criterion, tv_criterion, optimizer=None, schedu
             loss_aux = criterion(logits_aux, labels.squeeze(dim=1))
             loss_ce = loss_aux + criterion(logits, labels.squeeze(dim=1))
 
-            tv_loss_aux = tv_criterion(logits_aux, labels)
-            tv_loss = tv_criterion.alpha *(tv_loss_aux + tv_criterion(logits, labels))
-            # tv_loss = tv_criterion.alpha * tv_criterion(logits, labels)
+            # tv_loss_aux = tv_criterion(logits_aux, labels)
+            # tv_loss = tv_criterion.alpha *(tv_loss_aux + tv_criterion(logits, labels))
 
-            logits = torch.nn.UpsamplingBilinear2d(scale_factor=1/2)(logits)
+
+            # logits = torch.nn.MaxPool2d(kernel_size=2, stride=2)(logits)
+            # logits_aux = torch.nn.MaxPool2d(kernel_size=2, stride=2)(logits_aux)
+            logits = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits)
+            logits_aux = torch.nn.UpsamplingNearest2d(scale_factor=1 / 2)(logits_aux)
             labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
-            loss += criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
+            loss_ce += 0.5*criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
+            loss_ce += 0.5*criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
 
-            # loss = loss_ce
-            loss = loss_ce + tv_loss
+            # logits = torch.nn.MaxPool2d(kernel_size=2, stride=2)(logits)
+            # logits_aux = torch.nn.MaxPool2d(kernel_size=2, stride=2)(logits_aux)
+            logits = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(logits)
+            logits_aux = torch.nn.UpsamplingNearest2d(scale_factor=1 / 2)(logits_aux)
+            labels = torch.nn.UpsamplingNearest2d(scale_factor=1/2)(labels.float()).long()
+            loss_ce += 0.25*criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits_aux], dim=1), labels.squeeze(dim=1))
+            loss_ce += 0.25*criterion(torch.cat([-10 * torch.ones(labels.shape).to(device), logits], dim=1), labels.squeeze(dim=1))
+
+
+            loss, tv_loss = loss_ce, torch.tensor(0)
+            # loss = loss_ce + tv_loss
 
         else: # not wnet
             sys.exit('code needs to be adapted to train models other than Wnet here')
@@ -324,5 +337,5 @@ if __name__ == '__main__':
         with open(osp.join(experiment_path, 'val_metrics.txt'), 'w') as f:
             print('Best AUC = {:.2f}\nBest DICE = {:.2f}\nBest MCC = {:.2f}\nBest cycle = {}'.format(100*m1, 100*m2, 100*m3, best_cyc), file=f)
             for j in range(len(dices)):
-                print('\nEpoch = {} -> AUC = {:.2f}, Dice = {:.2f}, MCC = {:.2f}'.format(j, aucs[j],dices[j], mccs[j]), file=f)
+                print('\nEpoch = {} -> AUC = {:.2f}, Dice = {:.2f}, MCC = {:.2f}'.format(j+1, aucs[j],dices[j], mccs[j]), file=f)
             print('\nTraining time: {:0>2}h {:0>2}min {:05.2f}secs'.format(int(hours), int(minutes), seconds), file=f)

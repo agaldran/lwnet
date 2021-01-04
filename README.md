@@ -34,7 +34,7 @@ Please find below a table of contents describing what you can find in this repos
 ## 1. Dependencies and getting the data ready
 First things first, clone this repo somewhere in your computer:
 ```
-git clone https://github.com/agaldran/little_wnet.git .
+git clone https://github.com/agaldran/lwnet.git .
 ```
 
 For full reproducibility, you should use the configuration specified in the `requirements.txt` file.

@@ -28,6 +28,7 @@ parser.add_argument('--config_file', type=str, default=None, help='experiments/n
 # im_size overrides config file
 parser.add_argument('--im_size', help='delimited list input, could be 600,400', type=str, default='512')
 parser.add_argument('--device', type=str, default='cpu', help='where to run the training code (e.g. "cpu" or "cuda:0") [default: %(default)s]')
+parser.add_argument('--in_c', type=int, default=3, help='channels in input images')
 parser.add_argument('--result_path', type=str, default='results', help='path to save predictions (defaults to results')
 
 def flip_ud(tens):

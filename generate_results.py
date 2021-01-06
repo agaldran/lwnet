@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser()
 required_named = parser.add_argument_group('required arguments')
 required_named.add_argument('--dataset', type=str, help='generate results for which dataset', required=True)
 parser.add_argument('--public', type=str2bool, nargs='?', const=True, default=True, help='public or private data')
-parser.add_argument('--experiment_path', help='experiments/subfolder where checkpoint is', default=None)
+# parser.add_argument('--experiment_path', help='experiments/subfolder where checkpoint is', default=None)
 parser.add_argument('--tta', type=str, default='from_preds', help='test-time augmentation (no/from_logits/from_preds)')
 parser.add_argument('--binarize', type=str, default='otsu', help='binarization scheme (\'otsu\')')
 parser.add_argument('--config_file', type=str, default=None, help='experiments/name_of_config_file, overrides everything')
@@ -110,8 +110,9 @@ if __name__ == '__main__':
         if not osp.isfile(config_file): raise Exception('non-existent config file')
         with open(args.config_file, 'r') as f:
             args.__dict__.update(json.load(f))
-    experiment_path = args.experiment_path # this should exist in a config file
+    experiment_path = args.experiment_path # these should exist in a config file
     model_name = args.model_name
+    in_c = args.in_c
 
     if experiment_path is None: raise Exception('must specify path to experiment')
 
@@ -130,7 +131,7 @@ if __name__ == '__main__':
     print('* Reading test data from ' + osp.join(data_path, csv_path))
     test_dataset = get_test_dataset(data_path, csv_path=csv_path, tg_size=tg_size)
     print('* Instantiating model  = ' + str(model_name))
-    model = get_arch(model_name).to(device)
+    model = get_arch(model_name, in_c=in_c).to(device)
     if model_name == 'wnet': model.mode='eval'
 
     print('* Loading trained weights from ' + experiment_path)

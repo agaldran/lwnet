@@ -30,7 +30,7 @@ parser.add_argument('--max_lr', type=float, default=0.01, help='learning rate')
 parser.add_argument('--cycle_lens', type=str, default='20/50', help='cycling config (nr cycles/cycle len')
 parser.add_argument('--metric', type=str, default='auc', help='which metric to use for monitoring progress (tr_auc/auc/loss/dice)')
 parser.add_argument('--im_size', help='delimited list input, could be 600,400', type=str, default='512')
-parser.add_argument('--do_not_save', type=str2bool, nargs='?', const=True, default=False, help='avoid saving anything')
+_inparser.add_argument('--do_not_save', type=str2bool, nargs='?', const=True, default=False, help='avoid saving anything')
 parser.add_argument('--save_path', type=str, default='date_time', help='path to save model (defaults to date/time')
 # these three are for training with pseudo-segmentations
 # e.g. --csv_test data/DRIVE/test.csv --path_test_preds results/DRIVE/experiments/wnet_drive
@@ -267,7 +267,7 @@ if __name__ == '__main__':
 
 
     print('* Instantiating a {} model'.format(model_name))
-    model = get_arch(model_name, n_classes=n_classes)
+    model = get_arch(model_name, in_c=args.in_c, n_classes=n_classes)
     model = model.to(device)
 
     print("Total params: {0:,}".format(sum(p.numel() for p in model.parameters() if p.requires_grad)))

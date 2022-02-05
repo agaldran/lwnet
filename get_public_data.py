@@ -32,9 +32,9 @@ call ='wget http://webeye.ophth.uiowa.edu/abramoff/AV_groundTruth.zip ' \
       '&& mv data/DRIVE/AV_groundTruth/test/av/* data/DRIVE/manual_av && rm -r data/DRIVE/AV_groundTruth'
 os.system(call)
 
-call ='wget http://iflexis.com/downloads/HRF_AV_GT.zip ' \
-      '&& unzip HRF_AV_GT.zip -d data/HRF && rm HRF_AV_GT.zip && mv data/HRF/HRF_AV_GT data/HRF/manual_av'
-os.system(call)
+# call ='wget http://iflexis.com/downloads/HRF_AV_GT.zip ' \
+#       '&& unzip HRF_AV_GT.zip -d data/HRF && rm HRF_AV_GT.zip && mv data/HRF/HRF_AV_GT data/HRF/manual_av'
+# os.system(call)
 
 call = '(wget https://www5.cs.fau.de/fileadmin/research/datasets/fundus-images/all.zip ' \
        '&& unzip all.zip -d data/HRF && mv data/HRF/manual1 data/HRF/manual' \

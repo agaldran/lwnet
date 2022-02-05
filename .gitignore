@@ -10,7 +10,7 @@ __pycache__
 *.pyc
 
 
-#data
+data
 
 # Ignore result directories
 # experiments/

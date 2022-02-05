@@ -15,7 +15,7 @@ import collections
 import warnings
 
 from torchvision.transforms import functional as F
-
+import torchvision.transforms as T
 import pkg_resources
 import distutils.version
 TORCHVISION_VERSION = distutils.version.LooseVersion(pkg_resources.require('torchvision')[0].version)
@@ -34,12 +34,12 @@ __all__ = ["Compose", "ToTensor", "ToPILImage", "Normalize", "Resize", "Scale", 
            "RandomPerspective", "RandomErasing"]
 
 _pil_interpolation_to_str = {
-    Image.NEAREST: 'PIL.Image.NEAREST',
-    Image.BILINEAR: 'PIL.Image.BILINEAR',
-    Image.BICUBIC: 'PIL.Image.BICUBIC',
-    Image.LANCZOS: 'PIL.Image.LANCZOS',
-    Image.HAMMING: 'PIL.Image.HAMMING',
-    Image.BOX: 'PIL.Image.BOX',
+    T.InterpolationMode.NEAREST: 'PIL.Image.NEAREST',
+    T.InterpolationMode.BILINEAR: 'PIL.Image.BILINEAR',
+    T.InterpolationMode.BICUBIC: 'PIL.Image.BICUBIC',
+    T.InterpolationMode.LANCZOS: 'PIL.Image.LANCZOS',
+    T.InterpolationMode.HAMMING: 'PIL.Image.HAMMING',
+    T.InterpolationMode.BOX: 'PIL.Image.BOX',
 }
 
 def _get_image_size(img):
@@ -230,7 +230,7 @@ class Resize(object):
             ``PIL.Image.NEAREST``
     """
 
-    def __init__(self, size, interpolation=Image.BILINEAR, interpolation_tg = Image.NEAREST):
+    def __init__(self, size, interpolation=T.InterpolationMode.BILINEAR, interpolation_tg = T.InterpolationMode.NEAREST):
         assert isinstance(size, int) or (isinstance(size, Iterable) and len(size) == 2)
         self.size = size
         self.interpolation = interpolation
@@ -645,7 +645,7 @@ class RandomPerspective(object):
     """
 
     def __init__(self, distortion_scale=0.5, p=0.5,
-                 interpolation=Image.BICUBIC, interpolation_tg = Image.NEAREST):
+                 interpolation=T.InterpolationMode.BICUBIC, interpolation_tg = T.InterpolationMode.NEAREST):
         self.p = p
         self.interpolation = interpolation
         self.interpolation_tg = interpolation_tg
@@ -721,7 +721,7 @@ class RandomResizedCrop(object):
     """
 
     def __init__(self, size, scale=(0.08, 1.0), ratio=(3. / 4., 4. / 3.),
-                 interpolation=Image.BILINEAR, interpolation_tg = Image.NEAREST):
+                 interpolation=T.InterpolationMode.BILINEAR, interpolation_tg = T.InterpolationMode.NEAREST):
         if isinstance(size, tuple):
             self.size = size
         else:
@@ -1078,7 +1078,8 @@ class RandomRotation(object):
 
     """
 
-    def __init__(self, degrees, resample=False, resample_tg=False, expand=False, center=None, fill=0, fill_tg=(0,)): #
+    def __init__(self, degrees, resample=False, resample_tg=False, interpolation=T.InterpolationMode.BILINEAR,
+                 interpolation_tg = T.InterpolationMode.NEAREST, expand=False, center=None, fill=0, fill_tg=(0,)): #
         if isinstance(degrees, numbers.Number):
             if degrees < 0:
                 raise ValueError("If degrees is a single number, it must be positive.")
@@ -1094,6 +1095,9 @@ class RandomRotation(object):
         self.center = center
         self.fill = fill
         self.fill_tg = fill_tg
+
+        self.interpolation = interpolation
+        self.interpolation_tg = interpolation_tg
 
     @staticmethod
     def get_params(degrees):
@@ -1127,10 +1131,10 @@ class RandomRotation(object):
 
         else:
             if target is not None:
-                return F.rotate(img, angle, self.resample, self.expand, self.center, self.fill), \
-                       F.rotate(target, angle, self.resample_tg, self.expand, self.center, self.fill_tg) #
+                return F.rotate(img, angle, self.interpolation, self.expand, self.center, self.fill, resample=None), \
+                       F.rotate(target, angle, self.interpolation_tg, self.expand, self.center, self.fill_tg, resample=None) #
                        # resample = False is by default nearest, appropriate for targets
-            return F.rotate(img, angle, self.resample, self.expand, self.center, self.fill_tg)
+            return F.rotate(img, angle, self.interpolation, self.expand, self.center, self.fill_tg, resample=None)
 
     def __repr__(self):
         format_string = self.__class__.__name__ + '(degrees={0}'.format(self.degrees)
@@ -1172,7 +1176,7 @@ class RandomAffine(object):
     """
 
     def __init__(self, degrees, translate=None, scale=None, shear=None,
-                 resample=False, resample_tg=False, fillcolor=0):
+                 resample=None, resample_tg=None, fill=0):#fillcolor=0):
         if isinstance(degrees, numbers.Number):
             if degrees < 0:
                 raise ValueError("If degrees is a single number, it must be positive.")
@@ -1217,7 +1221,8 @@ class RandomAffine(object):
 
         self.resample = resample
         self.resample_tg = resample_tg
-        self.fillcolor = fillcolor
+        # self.fillcolor = fillcolor
+        self.fill = fill
 
     @staticmethod
     def get_params(degrees, translate, scale_ranges, shears, img_size):
@@ -1261,10 +1266,10 @@ class RandomAffine(object):
         """
         ret = self.get_params(self.degrees, self.translate, self.scale, self.shear, img.size)
         if target is not None:
-            return F.affine(img, *ret, resample=self.resample, fillcolor=self.fillcolor), \
-                   F.affine(target, *ret, resample=self.resample_tg, fillcolor=self.fillcolor)
+            return F.affine(img, *ret, resample=self.resample, fill=self.fill), \
+                   F.affine(target, *ret, resample=self.resample_tg, fill=self.fill)
                    # resample = False is by default nearest, appropriate for targets
-        return F.affine(img, *ret, resample=self.resample, fillcolor=self.fillcolor)
+        return F.affine(img, *ret, resample=self.resample, fill=self.fill)
 
     def __repr__(self):
         s = '{name}(degrees={degrees}'
@@ -1276,8 +1281,8 @@ class RandomAffine(object):
             s += ', shear={shear}'
         if self.resample > 0:
             s += ', resample={resample}'
-        if self.fillcolor != 0:
-            s += ', fillcolor={fillcolor}'
+        if self.fill != 0:
+            s += ', fill={fill}'
         s += ')'
         d = dict(self.__dict__)
         d['resample'] = _pil_interpolation_to_str[d['resample']]

@@ -3,7 +3,7 @@ from shutil import copyfile, rmtree
 import os.path as osp
 from datetime import datetime
 import operator
-from tqdm import trange
+from tqdm import tqdm
 import numpy as np
 import torch
 from models.get_model import get_arch
@@ -41,6 +41,7 @@ parser.add_argument('--path_test_preds', type=str, default=None, help='path to t
 parser.add_argument('--checkpoint_folder', type=str, default=None, help='path to model to start training (with pseudo labels now)')
 parser.add_argument('--num_workers', type=int, default=0, help='number of parallel (multiprocessing) workers to launch for data loading tasks (handled by pytorch) [default: %(default)s]')
 parser.add_argument('--device', type=str, default='cpu', help='where to run the training code (e.g. "cpu" or "cuda:0") [default: %(default)s]')
+parser.add_argument('--seed', type=int, default=0, help='seed')
 
 
 def compare_op(metric):
@@ -77,68 +78,73 @@ def run_one_epoch(loader, model, criterion, optimizer=None, scheduler=None,
     device='cuda' if next(model.parameters()).is_cuda else 'cpu'
     train = optimizer is not None  # if we are in training mode there will be an optimizer and train=True here
 
-    if train:
-        model.train()
-    else:
-        model.eval()
+    # if train:
+    #     model.train()
+    # else:
+    #     model.eval()
+
+    model.train() if train else model.eval()
+
     if assess: logits_all, labels_all = [], []
-    with trange(len(loader)) as t:
-        n_elems, running_loss = 0, 0
-        for i_batch, (inputs, labels) in enumerate(loader):
-            inputs, labels = inputs.to(device), labels.to(device)
-            logits = model(inputs)
+    n_elems, running_loss, tr_lr = 0, 0, 0
 
-            if isinstance(logits, tuple): # wnet
-                logits_aux, logits = logits
-                if model.n_classes == 1: # BCEWithLogitsLoss()/DiceLoss()
-                    loss_aux = criterion(logits_aux, labels.unsqueeze(dim=1).float())
-                    loss = loss_aux + criterion(logits, labels.unsqueeze(dim=1).float())
-                else: # CrossEntropyLoss()
-                    loss_aux = criterion(logits_aux, labels)
-                    loss = loss_aux + criterion(logits, labels)
-            else: # not wnet
-                if model.n_classes == 1:
-                    loss = criterion(logits, labels.unsqueeze(dim=1).float())  # BCEWithLogitsLoss()/DiceLoss()
-                else:
-                    loss = criterion(logits, labels)  # CrossEntropyLoss()
 
-            # if train:  # only in training mode
-            #     optimizer.zero_grad()
-            #     loss.backward()
-            #     optimizer.step()
-            #     scheduler.step()
+    for i_batch, (inputs, labels) in enumerate(loader):
+        inputs, labels = inputs.to(device), labels.to(device)
+        logits = model(inputs)
+        if isinstance(logits, tuple): # wnet
+            logits_aux, logits = logits
+            if model.n_classes == 1: # BCEWithLogitsLoss()/DiceLoss()
+                loss_aux = criterion(logits_aux, labels.unsqueeze(dim=1).float())
+                loss = loss_aux + criterion(logits, labels.unsqueeze(dim=1).float())
+            else: # CrossEntropyLoss()
+                loss_aux = criterion(logits_aux, labels)
+                loss = loss_aux + criterion(logits, labels)
+        else: # not wnet
+            if model.n_classes == 1:
+                loss = criterion(logits, labels.unsqueeze(dim=1).float())  # BCEWithLogitsLoss()/DiceLoss()
+            else:
+                loss = criterion(logits, labels)  # CrossEntropyLoss()
 
-            if train:  # only in training mode
-                (loss / (grad_acc_steps + 1)).backward() # for grad_acc_steps=0, this is just loss
-                if i_batch % (grad_acc_steps+1) == 0:  # for grad_acc_steps=0, this is always True
-                    optimizer.step()
-                    for _ in range(grad_acc_steps+1): scheduler.step() # for grad_acc_steps=0, this means once
-                    optimizer.zero_grad()
-            if assess:
-                logits_all.extend(logits)
-                labels_all.extend(labels)
+        # if train:  # only in training mode
+        #     optimizer.zero_grad()
+        #     loss.backward()
+        #     optimizer.step()
+        #     scheduler.step()
 
-            # Compute running loss
-            running_loss += loss.item() * inputs.size(0)
-            n_elems += inputs.size(0)
-            run_loss = running_loss / n_elems
-            if train: t.set_postfix(tr_loss_lr="{:.4f}/{:.6f}".format(float(run_loss), get_lr(optimizer)))
-            else: t.set_postfix(vl_loss="{:.4f}".format(float(run_loss)))
-            t.update()
-    if assess: return logits_all, labels_all, run_loss
-    return None, None, None
+        if train:  # only in training mode
+            (loss / (grad_acc_steps + 1)).backward() # for grad_acc_steps=0, this is just loss
+            tr_lr = get_lr(optimizer)
+            if i_batch % (grad_acc_steps+1) == 0:  # for grad_acc_steps=0, this is always True
+                optimizer.step()
+                for _ in range(grad_acc_steps+1):
+                    scheduler.step() # for grad_acc_steps=0, this means once
+                optimizer.zero_grad()
+        if assess:
+            logits_all.extend(logits)
+            labels_all.extend(labels)
+
+        # Compute running loss
+        running_loss += loss.item() * inputs.size(0)
+        n_elems += inputs.size(0)
+        run_loss = running_loss / n_elems
+
+    if assess: return logits_all, labels_all, run_loss, tr_lr
+    return None, None, run_loss, tr_lr
 
 def train_one_cycle(train_loader, model, criterion, optimizer=None, scheduler=None, grad_acc_steps=0, cycle=0):
 
     model.train()
     optimizer.zero_grad()
     cycle_len = scheduler.cycle_lens[cycle]
-    for epoch in range(cycle_len):
-        print('Cycle {:d} | Epoch {:d}/{:d}'.format(cycle+1, epoch+1, cycle_len))
-        if epoch == cycle_len-1: assess=True # only get logits/labels on last cycle
-        else: assess = False
-        tr_logits, tr_labels, tr_loss = run_one_epoch(train_loader, model, criterion, optimizer=optimizer,
-                                                      scheduler=scheduler, grad_acc_steps=grad_acc_steps, assess=assess)
+
+    with tqdm(range(cycle_len)) as t:
+        for epoch in t:
+            if epoch == cycle_len-1: assess=True # only get logits/labels on last cycle
+            else: assess = False
+            tr_logits, tr_labels, tr_loss, tr_lr = run_one_epoch(train_loader, model, criterion, optimizer=optimizer,
+                                                          scheduler=scheduler, grad_acc_steps=grad_acc_steps, assess=assess)
+            t.set_postfix(tr_loss_lr="{:.4f}/{:.6f}".format(float(tr_loss), tr_lr))
 
     return tr_logits, tr_labels, tr_loss
 
@@ -150,20 +156,16 @@ def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler
 
     for cycle in range(n_cycles):
         print('Cycle {:d}/{:d}'.format(cycle+1, n_cycles))
-        # prepare next cycle:
-        # reset iteration counter
-        scheduler.last_epoch = -1
-        # update number of iterations
-        scheduler.T_max = scheduler.cycle_lens[cycle] * len(train_loader)
-
         # train one cycle, retrieve segmentation data and compute metrics at the end of cycle
         tr_logits, tr_labels, tr_loss = train_one_cycle(train_loader, model, criterion, optimizer, scheduler, grad_acc_steps, cycle)
+
         # classification metrics at the end of cycle
+        print(25 * '-' + '  End of cycle, evaluating ' + 25 * '-')
         tr_auc, tr_dice = evaluate(tr_logits, tr_labels, model.n_classes)  # for n_classes>1, will need to redo evaluate
         del tr_logits, tr_labels
         with torch.no_grad():
             assess=True
-            vl_logits, vl_labels, vl_loss = run_one_epoch(val_loader, model, criterion, assess=assess)
+            vl_logits, vl_labels, vl_loss, _ = run_one_epoch(val_loader, model, criterion, assess=assess)
             vl_auc, vl_dice = evaluate(vl_logits, vl_labels, model.n_classes)  # for n_classes>1, will need to redo evaluate
             del vl_logits, vl_labels
         print('Train/Val Loss: {:.4f}/{:.4f}  -- Train/Val AUC: {:.4f}/{:.4f}  -- Train/Val DICE: {:.4f}/{:.4f} -- LR={:.6f}'.format(
@@ -183,7 +185,7 @@ def train_model(model, optimizer, criterion, train_loader, val_loader, scheduler
             best_auc, best_dice, best_cycle = vl_auc, vl_dice, cycle+1
             best_monitoring_metric = monitoring_metric
             if exp_path is not None:
-                print(15 * '-', ' Checkpointing ', 15 * '-')
+                print(25 * '-', ' Checkpointing ', 25 * '-')
                 save_model(exp_path, model, optimizer)
 
     del model
@@ -204,9 +206,8 @@ if __name__ == '__main__':
         os.environ['CUDA_VISIBLE_DEVICES'] = args.device.split(":",1)[1]
         if not torch.cuda.is_available():
             raise RuntimeError("cuda is not currently available!")
-        print(f"* Training on device '{args.device}'...")
+        print('* Training on device '.format(args.device))
         device = torch.device("cuda")
-
     else:  #cpu
         device = torch.device(args.device)
 
@@ -257,7 +258,7 @@ if __name__ == '__main__':
         label_values = [0, 255]
 
 
-    print(f"* Creating Dataloaders, batch size = {bs}, workers = {args.num_workers}")
+    print("* Creating Dataloaders, batch size = {}, workers = {}".format(bs, args.num_workers))
     train_loader, val_loader = get_train_val_loaders(csv_path_train=csv_train, csv_path_val=csv_val, batch_size=bs, tg_size=tg_size, label_values=label_values, num_workers=args.num_workers)
 
     # grad_acc_steps: if I want to train with a fake_bs=K but the actual bs I want is bs=N, then you use
@@ -293,7 +294,7 @@ if __name__ == '__main__':
             param_group['initial_lr'] = max_lr
 
 
-    scheduler = CosineAnnealingLR(optimizer, T_max=cycle_lens[0] * len(train_loader) // (grad_acc_steps + 1), eta_min=min_lr)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=cycle_lens[0] * len(train_loader), eta_min=0)
     setattr(optimizer, 'max_lr', max_lr)  # store it inside the optimizer for accessing to it later
     setattr(scheduler, 'cycle_lens', cycle_lens)
 

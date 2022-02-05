@@ -23,12 +23,6 @@ shutil.rmtree('data/STARE/labels-vk')
 shutil.rmtree('data/CHASEDB/splits')
 shutil.rmtree('data/AV-WIDE/splits')
 
-call = 'wget http://iflexis.com/downloads/DRIVE_AV_evalmasks.zip && unzip DRIVE_AV_evalmasks.zip -d data/DRIVE ' \
-       '&& rm DRIVE_AV_evalmasks.zip && mv data/DRIVE/DRIVE_AV_evalmasks/ZoneB_manual data/DRIVE '\
-       '&& mv data/DRIVE/DRIVE_AV_evalmasks/Predicted_AV results/results_av_drive_hemelings && rm -r data/DRIVE/DRIVE_AV_evalmasks'
-os.system(call)
-
-
 call = 'mv data/STARE/labels-ah data/STARE/manual && mv data/STARE/stare-images data/STARE/images'
 os.system(call)
 
@@ -38,9 +32,9 @@ call ='wget http://webeye.ophth.uiowa.edu/abramoff/AV_groundTruth.zip ' \
       '&& mv data/DRIVE/AV_groundTruth/test/av/* data/DRIVE/manual_av && rm -r data/DRIVE/AV_groundTruth'
 os.system(call)
 
-call ='wget http://iflexis.com/downloads/HRF_AV_GT.zip ' \
-      '&& unzip HRF_AV_GT.zip -d data/HRF && rm HRF_AV_GT.zip && mv data/HRF/HRF_AV_GT data/HRF/manual_av'
-os.system(call)
+# call ='wget http://iflexis.com/downloads/HRF_AV_GT.zip ' \
+#       '&& unzip HRF_AV_GT.zip -d data/HRF && rm HRF_AV_GT.zip && mv data/HRF/HRF_AV_GT data/HRF/manual_av'
+# os.system(call)
 
 call = '(wget https://www5.cs.fau.de/fileadmin/research/datasets/fundus-images/all.zip ' \
        '&& unzip all.zip -d data/HRF && mv data/HRF/manual1 data/HRF/manual' \
@@ -399,12 +393,12 @@ print('DR-HAGIS prepared')
 print('All public data prepared, ready to go.')
 
 
-print(104*'-')
-print('NOTE: The Les-AV dataset is hosted at figshare now, see get_public_data.py Line 405 forward for details.')
+
+print('NOTE: The Les-AV dataset is hosted at figshare now, see get_public_data.py Line 400 forward for details.')
 print(104*'-')
 ########################################################################################################################
-# What you can see below are the old instructions to download the Les-AV dataset. Since the release of this codebase,
-# Les-AV has been removed from the public url we used to employ for downloading it and hosted at figshare, which allows
+# What you can see below are the old instructions to download the LES-AV dataset. Since the release of this codebase,
+# LES-AV has been removed from the public url we used to employ for downloading it and hosted at figshare, which allows
 # free downloading, but as far as I know it needs to be done manually. Please head to the following url:
 #
 # https://figshare.com/articles/dataset/LES-AV_dataset/11857698

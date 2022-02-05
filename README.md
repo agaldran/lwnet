@@ -68,7 +68,7 @@ If the dataset is used in our work for training an A/V models (DRIVE and HRF), y
 The HRF dataset will also contain folders called `images_resized`, `manual_resized`, `mask_resized`.
 These are used only for training.
 
-> **Note**: The LES-AV dataset is still public but it now needs to be downloaded manually, please see the comments in `get_public_data.py` Line 405 forward for details.
+> **Note**: The LES-AV dataset is still public but it now needs to be downloaded manually, please see the comments in `get_public_data.py` Line 400 forward for details.
 
 ## 2. Training a W-Net for vessel segmentation
 Train a model on a given dataset. You also need to supply the path to save the model.

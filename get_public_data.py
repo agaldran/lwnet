@@ -23,12 +23,6 @@ shutil.rmtree('data/STARE/labels-vk')
 shutil.rmtree('data/CHASEDB/splits')
 shutil.rmtree('data/AV-WIDE/splits')
 
-call = 'wget http://iflexis.com/downloads/DRIVE_AV_evalmasks.zip && unzip DRIVE_AV_evalmasks.zip -d data/DRIVE ' \
-       '&& rm DRIVE_AV_evalmasks.zip && mv data/DRIVE/DRIVE_AV_evalmasks/ZoneB_manual data/DRIVE '\
-       '&& mv data/DRIVE/DRIVE_AV_evalmasks/Predicted_AV results/results_av_drive_hemelings && rm -r data/DRIVE/DRIVE_AV_evalmasks'
-os.system(call)
-
-
 call = 'mv data/STARE/labels-ah data/STARE/manual && mv data/STARE/stare-images data/STARE/images'
 os.system(call)
 
@@ -400,7 +394,7 @@ print('All public data prepared, ready to go.')
 
 
 print(104*'-')
-print('NOTE: The Les-AV dataset is hosted at figshare now, see get_public_data.py Line 405 forward for details.')
+print('NOTE: The Les-AV dataset is hosted at figshare now, see get_public_data.py Line 400 forward for details.')
 print(104*'-')
 ########################################################################################################################
 # What you can see below are the old instructions to download the LES-AV dataset. Since the release of this codebase,

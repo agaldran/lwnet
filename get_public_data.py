@@ -60,134 +60,134 @@ os.system(call)
 
 print('preparing data')
 
-# #######################################################################################################################
-# # process drive data, generate CSVs
-# path_ims = 'data/DRIVE/images'
-# path_masks = 'data/DRIVE/mask'
-# path_gts = 'data/DRIVE/manual'
-#
-# all_im_names = sorted(os.listdir(path_ims))
-# all_mask_names = sorted(os.listdir(path_masks))
-# all_gt_names = sorted(os.listdir(path_gts))
-#
-# # append paths
-# num_ims = len(all_im_names)
-# all_im_names = [osp.join(path_ims, n) for n in all_im_names]
-# all_mask_names = [osp.join(path_masks, n) for n in all_mask_names]
-# all_gt_names = [osp.join(path_gts, n) for n in all_gt_names]
-#
-# test_im_names = all_im_names[:num_ims//2]
-# train_im_names = all_im_names[num_ims//2:]
-#
-# test_mask_names = all_mask_names[:num_ims//2]
-# train_mask_names = all_mask_names[num_ims//2:]
-#
-# test_gt_names = all_gt_names[:num_ims//2]
-# train_gt_names = all_gt_names[num_ims//2:]
-#
-# df_drive_all = pd.DataFrame({'im_paths': all_im_names,
-#                              'gt_paths': all_gt_names,
-#                              'mask_paths': all_mask_names})
-#
-# df_drive_train = pd.DataFrame({'im_paths': train_im_names,
-#                                'gt_paths': train_gt_names,
-#                                'mask_paths': train_mask_names})
-#
-# df_drive_test = pd.DataFrame({'im_paths': test_im_names,
-#                               'gt_paths': test_gt_names,
-#                                'mask_paths': test_mask_names})
-#
-# df_drive_train, df_drive_val = df_drive_train[:16], df_drive_train[16:]
-#
-#
-# df_drive_train.to_csv('data/DRIVE/train.csv', index=False)
-# df_drive_val.to_csv('data/DRIVE/val.csv', index=False)
-# df_drive_test.to_csv('data/DRIVE/test.csv', index=False)
-# df_drive_all.to_csv('data/DRIVE/test_all.csv', index=False)
-#
-# # derive A/V split from vessel split
-# df_drive_train.gt_paths = [n.replace('manual/', 'manual_av/')
-#                         .replace('manual1.gif', 'training.png')
-#                         for n in df_drive_train.gt_paths]
-#
-# df_drive_val.gt_paths = [n.replace('manual/', 'manual_av/')
-#                         .replace('manual1.gif', 'training.png')
-#                         for n in df_drive_val.gt_paths]
-#
-# df_drive_test.gt_paths = [n.replace('manual/', 'manual_av/')
-#                         .replace('manual1.gif', 'test.png')
-#                         for n in df_drive_test.gt_paths]
-# df_drive_train.to_csv('data/DRIVE/train_av.csv', index=False)
-# df_drive_val.to_csv('data/DRIVE/val_av.csv', index=False)
-# df_drive_test.to_csv('data/DRIVE/test_av.csv', index=False)
-# print('DRIVE prepared')
-#
-# df_drive_train_val = pd.concat([df_drive_train, df_drive_val], axis=0)
-#
-# for n in df_drive_train_val.gt_paths:
-#     x = io.imread(n)
-#     arteries = np.zeros_like(x[:, :, 0])
-#     veins = np.zeros_like(x[:, :, 0])
-#     unk = np.zeros_like(x[:, :, 0])
-#
-#     av = np.zeros_like(x[:, :, 0])
-#
-#     arteries[x[:, :, 0] == 255] = 255
-#     unk[x[:, :, 1] == 255] = 255
-#     veins[x[:, :, 2] == 255] = 255
-#
-#     av[unk == 255] = 85
-#     av[arteries == 255] = 170
-#     av[veins == 255] = 255
-#
-#     io.imsave(n, av)
-# print('DRIVE A/V prepared')
-#
-# # ########################################################################################################################
-# path_ims = 'data/CHASEDB/images'
-# path_masks = 'data/CHASEDB/masks'
-# path_gts = 'data/CHASEDB/manual'
-#
-# all_im_names = sorted(os.listdir(path_ims))
-# all_mask_names = sorted(os.listdir(path_masks))
-# all_gt_names = sorted(os.listdir(path_gts))
-#
-# # append paths
-# all_im_names = [osp.join(path_ims, n) for n in all_im_names]
-# all_mask_names = [osp.join(path_masks, n) for n in all_mask_names]
-# all_gt_names = [osp.join(path_gts, n) for n in all_gt_names if '1st' in n]
-#
-# num_ims = len(all_im_names)
-# train_im_names = all_im_names[ :8]
-# test_im_names  = all_im_names[8: ]
-#
-# train_mask_names = all_mask_names[ :8]
-# test_mask_names  = all_mask_names[8: ]
-#
-# train_gt_names = all_gt_names[ :8]
-# test_gt_names  = all_gt_names[8: ]
-#
-# df_chasedb_all = pd.DataFrame({'im_paths': all_im_names,
-#                              'gt_paths': all_gt_names,
-#                              'mask_paths': all_mask_names})
-#
-# df_chasedb_train = pd.DataFrame({'im_paths': train_im_names,
-#                               'gt_paths': train_gt_names,
-#                               'mask_paths': train_mask_names})
-#
-# df_chasedb_test = pd.DataFrame({'im_paths': test_im_names,
-#                               'gt_paths': test_gt_names,
-#                               'mask_paths': test_mask_names})
-#
-# num_ims = len(df_chasedb_train)
-# tr_ims = int(0.8*num_ims)
-# df_chasedb_train, df_chasedb_val = df_chasedb_train[:tr_ims], df_chasedb_train[tr_ims:]
-#
-# df_chasedb_train.to_csv('data/CHASEDB/train.csv', index=False)
-# df_chasedb_val.to_csv('data/CHASEDB/val.csv', index=False)
-# df_chasedb_test.to_csv('data/CHASEDB/test.csv', index=False)
-# df_chasedb_all.to_csv('data/CHASEDB/test_all.csv', index=False)
-# print('CHASE-DB prepared')
+#######################################################################################################################
+# process drive data, generate CSVs
+path_ims = 'data/DRIVE/images'
+path_masks = 'data/DRIVE/mask'
+path_gts = 'data/DRIVE/manual'
+
+all_im_names = sorted(os.listdir(path_ims))
+all_mask_names = sorted(os.listdir(path_masks))
+all_gt_names = sorted(os.listdir(path_gts))
+
+# append paths
+num_ims = len(all_im_names)
+all_im_names = [osp.join(path_ims, n) for n in all_im_names]
+all_mask_names = [osp.join(path_masks, n) for n in all_mask_names]
+all_gt_names = [osp.join(path_gts, n) for n in all_gt_names]
+
+test_im_names = all_im_names[:num_ims//2]
+train_im_names = all_im_names[num_ims//2:]
+
+test_mask_names = all_mask_names[:num_ims//2]
+train_mask_names = all_mask_names[num_ims//2:]
+
+test_gt_names = all_gt_names[:num_ims//2]
+train_gt_names = all_gt_names[num_ims//2:]
+
+df_drive_all = pd.DataFrame({'im_paths': all_im_names,
+                             'gt_paths': all_gt_names,
+                             'mask_paths': all_mask_names})
+
+df_drive_train = pd.DataFrame({'im_paths': train_im_names,
+                               'gt_paths': train_gt_names,
+                               'mask_paths': train_mask_names})
+
+df_drive_test = pd.DataFrame({'im_paths': test_im_names,
+                              'gt_paths': test_gt_names,
+                               'mask_paths': test_mask_names})
+
+df_drive_train, df_drive_val = df_drive_train[:16], df_drive_train[16:]
+
+
+df_drive_train.to_csv('data/DRIVE/train.csv', index=False)
+df_drive_val.to_csv('data/DRIVE/val.csv', index=False)
+df_drive_test.to_csv('data/DRIVE/test.csv', index=False)
+df_drive_all.to_csv('data/DRIVE/test_all.csv', index=False)
+
+# derive A/V split from vessel split
+df_drive_train.gt_paths = [n.replace('manual/', 'manual_av/')
+                        .replace('manual1.gif', 'training.png')
+                        for n in df_drive_train.gt_paths]
+
+df_drive_val.gt_paths = [n.replace('manual/', 'manual_av/')
+                        .replace('manual1.gif', 'training.png')
+                        for n in df_drive_val.gt_paths]
+
+df_drive_test.gt_paths = [n.replace('manual/', 'manual_av/')
+                        .replace('manual1.gif', 'test.png')
+                        for n in df_drive_test.gt_paths]
+df_drive_train.to_csv('data/DRIVE/train_av.csv', index=False)
+df_drive_val.to_csv('data/DRIVE/val_av.csv', index=False)
+df_drive_test.to_csv('data/DRIVE/test_av.csv', index=False)
+print('DRIVE prepared')
+
+df_drive_train_val = pd.concat([df_drive_train, df_drive_val], axis=0)
+
+for n in df_drive_train_val.gt_paths:
+    x = io.imread(n)
+    arteries = np.zeros_like(x[:, :, 0])
+    veins = np.zeros_like(x[:, :, 0])
+    unk = np.zeros_like(x[:, :, 0])
+
+    av = np.zeros_like(x[:, :, 0])
+
+    arteries[x[:, :, 0] == 255] = 255
+    unk[x[:, :, 1] == 255] = 255
+    veins[x[:, :, 2] == 255] = 255
+
+    av[unk == 255] = 85
+    av[arteries == 255] = 170
+    av[veins == 255] = 255
+
+    io.imsave(n, av)
+print('DRIVE A/V prepared')
+
+# ########################################################################################################################
+path_ims = 'data/CHASEDB/images'
+path_masks = 'data/CHASEDB/masks'
+path_gts = 'data/CHASEDB/manual'
+
+all_im_names = sorted(os.listdir(path_ims))
+all_mask_names = sorted(os.listdir(path_masks))
+all_gt_names = sorted(os.listdir(path_gts))
+
+# append paths
+all_im_names = [osp.join(path_ims, n) for n in all_im_names]
+all_mask_names = [osp.join(path_masks, n) for n in all_mask_names]
+all_gt_names = [osp.join(path_gts, n) for n in all_gt_names if '1st' in n]
+
+num_ims = len(all_im_names)
+train_im_names = all_im_names[ :8]
+test_im_names  = all_im_names[8: ]
+
+train_mask_names = all_mask_names[ :8]
+test_mask_names  = all_mask_names[8: ]
+
+train_gt_names = all_gt_names[ :8]
+test_gt_names  = all_gt_names[8: ]
+
+df_chasedb_all = pd.DataFrame({'im_paths': all_im_names,
+                             'gt_paths': all_gt_names,
+                             'mask_paths': all_mask_names})
+
+df_chasedb_train = pd.DataFrame({'im_paths': train_im_names,
+                              'gt_paths': train_gt_names,
+                              'mask_paths': train_mask_names})
+
+df_chasedb_test = pd.DataFrame({'im_paths': test_im_names,
+                              'gt_paths': test_gt_names,
+                              'mask_paths': test_mask_names})
+
+num_ims = len(df_chasedb_train)
+tr_ims = int(0.8*num_ims)
+df_chasedb_train, df_chasedb_val = df_chasedb_train[:tr_ims], df_chasedb_train[tr_ims:]
+
+df_chasedb_train.to_csv('data/CHASEDB/train.csv', index=False)
+df_chasedb_val.to_csv('data/CHASEDB/val.csv', index=False)
+df_chasedb_test.to_csv('data/CHASEDB/test.csv', index=False)
+df_chasedb_all.to_csv('data/CHASEDB/test_all.csv', index=False)
+print('CHASE-DB prepared')
 # # ########################################################################################################################
 # # process HRF data, generate CSVs
 path_ims = 'data/HRF/images'
